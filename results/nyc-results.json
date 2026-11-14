@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "dataset": "NYC Yellow Taxi January 2016",
+    "source": "Kaggle elemento NYC Yellow Taxi Trip Data",
+    "sample_for_models": 500000,
+    "test_fraction": 0.25,
+    "split": "Random train/test split, random_state=42, as implemented in uploaded notebook. Time-based split not yet run.",
+    "unverified": "Notebook does not show separate validation tuning. Best-depth figures in experiment log differ from current notebook outputs.",
+    "rmse_unit": "minutes",
+    "note": "Scores reconciled against the final supplied Kaggle notebook outputs. The notebook files in notebooks/ are preserved unchanged.",
+    "source_notebook": "notebooks/nyc-taxi-final.ipynb"
+  },
+  "cleaning": {
+    "steps": [
+      {
+        "label": "Raw January 2016",
+        "rows": 10906858
+      },
+      {
+        "label": "Duration: (0,120] min",
+        "rows": 10877553
+      },
+      {
+        "label": "Recorded distance: (0,50] mi",
+        "rows": 10824404
+      },
+      {
+        "label": "Mean speed: (0,100] mph",
+        "rows": 10815889
+      },
+      {
+        "label": "Both endpoints in regional box",
+        "rows": 10654223
+      }
+    ],
+    "correlations": {
+      "raw": {
+        "tripDistHaversine": 0.0105,
+        "durationHaversine": 0.000244
+      },
+      "clean": {
+        "tripDistHaversine": 0.9692,
+        "durationHaversine": 0.7676
+      }
+    }
+  },
+  "scores": [
+    {
+      "features": "coords",
+      "model": "linear",
+      "rmse": 8.9366,
+      "mae": 6.4234,
+      "source": "Notebook cell 45"
+    },
+    {
+      "features": "distance",
+      "model": "linear",
+      "rmse": 6.4735,
+      "mae": 4.3766,
+      "source": "Notebook cell 43"
+    },
+    {
+      "features": "distance",
+      "model": "tree",
+      "rmse": 6.286,
+      "mae": 4.1926,
+      "source": "Notebook cell 44",
+      "depth": 3
+    },
+    {
+      "features": "weekday",
+      "model": "linear",
+      "rmse": 6.4117,
+      "mae": 4.3291,
+      "source": "Notebook cell 48"
+    },
+    {
+      "features": "weekday",
+      "model": "tree",
+      "rmse": 5.9596,
+      "mae": 3.9205,
+      "source": "Notebook cell 49",
+      "depth": 8
+    },
+    {
+      "features": "hour",
+      "model": "linear",
+      "rmse": 6.2453,
+      "mae": 4.1858,
+      "source": "Notebook cell 51",
+      "flag": "The hour-feature list excludes hour_23; verify and rerun."
+    },
+    {
+      "features": "hour",
+      "model": "tree",
+      "rmse": 5.8409,
+      "mae": 3.7339,
+      "source": "Notebook cell 52",
+      "depth": 14,
+      "flag": "Experiment log reports a different tuned tree score (5.4765 RMSE). Verify before publication."
+    },
+    {
+      "features": "hour",
+      "model": "boost",
+      "rmse": 4.8957,
+      "mae": 3.1181,
+      "source": "Notebook cell 53",
+      "flag": "Hour-feature list excludes hour_23."
+    }
+  ],
+  "early": {
+    "rawLinear": {
+      "rmse": 57.21,
+      "mae": 10.2018
+    },
+    "partiallyCleanLinear": {
+      "rmse": 52.7959,
+      "mae": 9.8636
+    },
+    "unrestrictedTree": {
+      "trainRMSE": 4.8801,
+      "trainMAE": 0.1155,
+      "testRMSE": 138.5187,
+      "testMAE": 9.4284
+    }
+  }
+}
