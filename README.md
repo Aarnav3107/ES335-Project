@@ -59,9 +59,17 @@ The Football xG notebook reads a shots table built from StatsBomb Open Data. On 
 
 The site lives in `docs/` and is published with GitHub Pages from the `main` branch. It needs no build step: every page is plain HTML, CSS and JavaScript, and it also works when opened straight from disk. The numbers on the site are taken from the saved notebook outputs. Scripts in `docs/tools/` generate two of the site's data files: the Football xG data is read directly from the saved notebook outputs, and the Seoul year timeline is rebuilt from the source CSV with the notebook's split code, refusing to write anything unless it reproduces the published season coverage exactly. To update the live site, edit the files in `docs/`, then commit and push to `main`, and GitHub Pages redeploys within a minute or two.
 
-## Data and licences
 
-The raw datasets are not redistributed in this repository. NYC Taxi and Seoul Bikes come from Kaggle, and the football shots come from [StatsBomb Open Data](https://github.com/statsbomb/open-data), which is free for research as long as StatsBomb is credited as the source. Links and details for each dataset are in `data/README.md`.
+## References
+
+**Research paper that inspired the project**
+- Tschalzev, A., Marton, S., Lüdtke, S., Bartelt, C., & Stuckenschmidt, H. (2024). *A Data-Centric Perspective on Evaluating Machine Learning Models for Tabular Data.* Advances in Neural Information Processing Systems 37 (NeurIPS 2024), Datasets and Benchmarks Track. [Proceedings page](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html)
+
+**Datasets**
+- NYC Taxi: NYC Taxi & Limousine Commission, [TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page), Yellow Taxi trips for January 2016, used through the Kaggle copy [NYC Yellow Taxi Trip Data](https://www.kaggle.com/datasets/elemento/nyc-yellow-taxi-trip-data).
+- Seoul Bikes: *Seoul Bike Sharing Demand* [Dataset]. (2020). UCI Machine Learning Repository. https://doi.org/10.24432/C5F62R, used through the Kaggle copy [Seoul Bike Sharing Demand](https://www.kaggle.com/datasets/waleedejaz/seoul-bike-sharing-demand).
+- Football xG: StatsBomb, [StatsBomb Open Data](https://github.com/statsbomb/open-data), 2015/16 Premier League, La Liga, Serie A and Ligue 1. Data provided by StatsBomb and used under the StatsBomb public data user agreement.
+
 
 ## AI use
 
