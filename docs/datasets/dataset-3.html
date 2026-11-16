@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="Can football knowledge make plain Logistic Regression as good as XGBoost at expected goals? A first-person xG investigation on StatsBomb open data for ES335." name="description"/>
+  <title>
+   Football xG · How knowing the game closed the gap | Beyond the Model
+  </title>
+  <link href="../css/style.css?v=20261116-home1" rel="stylesheet"/>
+  <link href="../css/xg.css?v=20261116-home1" rel="stylesheet"/>
+  <script defer="" src="../js/xg-data.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/xg-models.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/xg.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/common.js?v=20261116-home1">
+  </script>
+ </head>
+ <body class="xg">
+  <a class="skip" href="#main">
+   Skip to case study
+  </a>
+  <header class="site-header">
+   <nav class="nav">
+    <a class="logo" href="../index.html">
+     Beyond
+     <span class="logo-mark">
+      .
+     </span>
+     the Model
+    </a>
+    <div class="nav-links">
+     <a href="../index.html">
+      Home
+     </a>
+     <a href="../datasets/nyc-taxi.html">
+      NYC Taxi
+     </a>
+     <a href="../datasets/dataset-2.html">
+      Seoul Bikes
+     </a>
+     <a aria-current="page" href="../datasets/dataset-3.html">
+      Football xG
+     </a>
+     <a href="../index.html#summary">
+      Summary
+     </a>
+    </div>
+   </nav>
+  </header>
+  <main id="main">
+   <section class="wrap hero" style="padding-bottom: 40px">
+    <span class="eyebrow">
+     Case study 03 / Football xG / Classification
+    </span>
+    <h1>
+     How knowing the game let a simple model catch up with XGBoost
+    </h1>
+    <p class="lead">
+     A player shoots, and we want to know the chance that it ends up in the net. We love football, so for the last case study we picked a football question and tested something we believed as fans: if we describe a shot the way a footballer would, can plain Logistic Regression keep up with XGBoost?
+    </p>
+    <div class="hero-actions">
+     <a class="btn" href="#problem">
+      Start exploring ↓
+     </a>
+     <a class="btn ghost" href="#shot-lab">
+      Jump straight to the pitch demo
+     </a>
+    </div>
+   </section>
+   <div class="wrap">
+    <div class="statrow">
+     <div class="stat">
+      <strong>
+       37,449
+      </strong>
+      <small>
+       Shots after cleaning, from the 2015/16 Premier League, La Liga, Serie A and Ligue 1
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       0 → 9
+      </strong>
+      <small>
+       Match splits out of 10 where Logistic Regression beat XGBoost, before and after the football features
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       0.2453
+      </strong>
+      <small>
+       Test log loss of our engineered Logistic Regression, against 0.2431 for StatsBomb’s own xG
+      </small>
+     </div>
+    </div>
+    <div class="report-layout">
+     <aside aria-label="Page chapters" class="toc">
+      <span>
+       On this page
+      </span>
+      <a href="#problem">
+       01 / The question
+      </a>
+      <a href="#raw-data">
+       02 / The raw data
+      </a>
+      <a href="#round-one">
+       03 / Round one
+      </a>
+      <a href="#features">
+       04 / Football knowledge
+      </a>
+      <a href="#rematch">
+       05 / The rematch
+      </a>
+      <a href="#findings">
+       06 / Findings
+      </a>
+      <a href="#code">
+       Code &amp; sources
+      </a>
+     </aside>
+     <div>
+      <section class="chapter" id="problem">
+       <span class="chapter-number">
+        CHAPTER 01
+       </span>
+       <h2>
+        What is a shot actually worth?
+       </h2>
+       <p>
+        If you watch football on TV you’ve probably seen a number called
+        <strong>
+         expected goals
+        </strong>
+        , or xG, after the match. Every shot gets a probability of going in, and a team’s xG is just those probabilities added up. A tap-in from two yards might be worth something like 0.6, while a hopeful effort from 30 yards might be worth 0.02.
+       </p>
+       <p>
+        For this case study we built our own xG model. Each row in the data is one shot from StatsBomb’s free event data, covering the full 2015/16 season of four leagues, which comes to 37,888 shots from 1,517 matches. The target is either a goal (1) or no goal (0), so a save, a block, a miss and a shot off the post all count as 0.
+       </p>
+       <p>
+        NYC Taxi showed us that messy data can hide the signal, and Seoul Bikes showed us that the way you evaluate can change the winner. With this dataset we wanted to test a third idea, which is whether
+        <strong>
+         domain knowledge can do the job of model complexity
+        </strong>
+        .
+       </p>
+       <div class="note">
+        <strong>
+         How we score the models:
+        </strong>
+        only about 1 in 10 shots is a goal (10.21% before cleaning), so accuracy is useless here, since a model that says “no goal” every single time is already right about 90% of the time. We use two other scores instead.
+        <strong>
+         Log loss
+        </strong>
+        judges the probabilities themselves and punishes the model hard for being confidently wrong. It is the same loss that Logistic Regression minimises while training, and lower is better.
+        <strong>
+         AUC
+        </strong>
+        is the chance that a randomly picked goal gets a higher xG than a randomly picked miss, so 0.5 is no better than a coin flip and 1.0 is perfect.
+       </div>
+       <div class="note">
+        <strong>
+         What the model is not allowed to see:
+        </strong>
+        anything that happens after the ball is struck, like where the shot ended up or whether it took a deflection, because using that would be cheating. StatsBomb also includes its own professional xG for every shot. We never use it as a feature, and only bring it back at the very end as a reference to compare against.
+       </div>
+      </section>
+      <section class="chapter" id="raw-data">
+       <span class="chapter-number">
+        CHAPTER 02
+       </span>
+       <h2>
+        What the raw data already tells us
+       </h2>
+       <p>
+        Every shot comes with an x/y location on a 120 × 80 yard pitch, where the goal sits at x = 120 between y = 36 and y = 44. We also get the body part, the technique, how the move started, and a few yes/no flags such as whether it was one on one. Before building any model, we wanted to see where goals actually come from, and you can explore the same thing below.
+       </p>
+       <div class="lab" id="eda-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           Goal rate across the pitch
+          </h3>
+         </div>
+        </div>
+        <div aria-label="Choose a view" class="seg" id="eda-buttons" role="group">
+         <button aria-pressed="true" class="active" data-view="width" type="button">
+          Across the width
+         </button>
+         <button aria-pressed="false" data-view="depth" type="button">
+          Towards goal
+         </button>
+         <button aria-pressed="false" data-view="body" type="button">
+          Body part
+         </button>
+         <button aria-pressed="false" data-view="distance" type="button">
+          Distance*
+         </button>
+         <button aria-pressed="false" data-view="angle" type="button">
+          Angle*
+         </button>
+         <button aria-pressed="false" data-view="defenders" type="button">
+          Defenders in the way*
+         </button>
+        </div>
+        <div class="lab-grid" id="eda-grid">
+         <div id="eda-pitch-panel">
+          <p class="panel-title">
+           The pitch
+           <span>
+            darker means more goals
+           </span>
+          </p>
+          <div id="eda-pitch">
+          </div>
+         </div>
+         <div>
+          <p class="panel-title">
+           Goal rate for each group
+           <span>
+            share of shots that went in
+           </span>
+          </p>
+          <div id="eda-bars">
+          </div>
+         </div>
+        </div>
+        <p aria-live="polite" class="summary" id="eda-summary" role="status">
+        </p>
+        <p class="source-line">
+         * These are the engineered features from Chapter 04, shown here so you can compare them with the raw columns. Every rate comes from the EDA cells in the notebook, and “Towards goal” uses StatsBomb’s x coordinate, where 120 is the goal line.
+        </p>
+       </div>
+       <h3>
+        The shape that a straight line can’t draw
+       </h3>
+       <p>
+        The view across the width is the one we want you to look at most carefully. The goal rate climbs to 18.7% in the middle of the pitch (y between 38 and 42) and drops to around 2 or 3% out wide on
+        <em>
+         both
+        </em>
+        sides, so it looks like a hill. Logistic Regression gives each column a single coefficient, which means that for location_y it can only say “further left is better” or “further right is better”. It has no way of saying “the middle is better”, while a tree can learn that simply by splitting twice.
+       </p>
+       <h3>
+        The header puzzle
+       </h3>
+       <p>
+        One result in the EDA looked wrong to us. Headers go in about as often as shots with the foot (10.7% against 10.5% for the right foot), and anyone who has played knows a header is much harder to place than a kick. So we checked where the headers were taken from, and on average they come from about 10 yards closer to goal. The location was doing the work, not the head. We come back to this in Chapter 05, where the model gives us a cleaner answer.
+       </p>
+       <h3>
+        How we cleaned the data and split it
+       </h3>
+       <p>
+        We removed penalties, because they are always taken from the same spot and 75% of them go in, which makes them a completely different situation. We also removed the 7 shots taken directly from corners, and that took us from 37,888 shots to 37,481. A few freeze frames didn’t have the keeper in them, so we dropped those too, leaving 37,449. One shot was recorded 0.2 yards past the goal line, so we simply put it back on the line.
+       </p>
+       <p>
+        For the split we used the same idea as the whole-day split in Seoul. Every shot from one match goes into the same set, because shots in the same match share the same teams, keepers and conditions, and splitting them up would let the model peek at the test matches. We split the matches 60/20/20, stratified by league, which gave
+        <strong>
+         22,431, 7,501 and 7,517
+        </strong>
+        shots for training, validation and test.
+       </p>
+      </section>
+      <section class="chapter" id="round-one">
+       <span class="chapter-number">
+        CHAPTER 03
+       </span>
+       <h2>
+        Round one, using the columns as they come
+       </h2>
+       <p>
+        In the first round we used no football knowledge at all, just the columns as they come, one-hot encoded the way any standard tabular pipeline would do it: location_x, location_y, minute, period, the yes/no flags, body part, technique, shot type and play pattern. We used the same three models as in Seoul, which are Logistic Regression, a Decision Tree whose depth we picked on validation log loss, and XGBoost with exactly the Seoul settings.
+       </p>
+       <h3>
+        Baseline
+       </h3>
+       <p>
+        Logistic Regression on these raw columns is our baseline. It is the simplest model we used and it gets exactly the columns a generic pipeline would give it, so every later result on this page, whether it comes from a stronger model or from new features, is measured against its test log loss of 0.2705 and AUC of 0.7441. For a sense of scale, an AUC of 0.5 would be no better than a coin flip.
+       </p>
+       <div class="mini-grid">
+        <div class="metric">
+         <small>
+          Logistic Regression · test log loss
+         </small>
+         <strong>
+          0.2705
+         </strong>
+         <em>
+          AUC 0.7441
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          Decision Tree · test log loss
+         </small>
+         <strong>
+          0.2771
+         </strong>
+         <em>
+          AUC 0.7441
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          XGBoost · test log loss
+         </small>
+         <strong>
+          0.2547
+         </strong>
+         <em>
+          AUC 0.7904
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          How far LR is behind XGBoost
+         </small>
+         <strong>
+          +6.2%
+         </strong>
+         <em>
+          log loss, and 0.046 lower AUC
+         </em>
+        </div>
+       </div>
+       <p>
+        This is what we expected going in, and the hill from Chapter 02 explains it. XGBoost combines many trees, so it can carve the pitch into boxes and learn that the middle is special, while Logistic Regression only has one straight-line weight for each column. The gap wasn’t down to a lucky split either: when we repeated the experiment on ten different match splits, XGBoost won every single time.
+       </p>
+       <p>
+        So the question for the rest of this page is whether that gap comes from the
+        <em>
+         model
+        </em>
+        itself, or from the way we
+        <em>
+         described the shot
+        </em>
+        to it.
+       </p>
+      </section>
+      <section class="chapter" id="features">
+       <span class="chapter-number">
+        CHAPTER 04
+       </span>
+       <h2>
+        Describing a shot the way a footballer would
+       </h2>
+       <p>
+        If you ask a footballer why a chance was a good one, they won’t tell you that x was 108 and y was 41. They’ll say it was close, he had the whole goal to aim at, nobody was in the way, and the keeper was stranded. So we turned those sentences into columns. We added six new features, and every one of them is built from information the dataset already had.
+       </p>
+       <h3>
+        1. Distance and shooting angle
+       </h3>
+       <p>
+        Distance is just the straight line from the shot to the centre of the goal. The angle is how much of the goal mouth the shooter can actually see, which is the angle between the lines from the ball to each of the two posts. From the middle of the box you can see a lot of goal, and from near the byline you see only a sliver. This is exactly the hill from Chapter 02, turned into a number that only ever goes one way.
+       </p>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Distance and angle · final notebook
+         </span>
+         <button aria-label="Copy distance and angle code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code data-code="distance_angle"></code></pre>
+       </div>
+       <h3>
+        2. Reading the freeze frame to find the defenders and the keeper
+       </h3>
+       <p>
+        This is the part a generic pipeline would simply throw away. Every StatsBomb shot comes with a
+        <strong>
+         freeze frame
+        </strong>
+        , which records where every visible player was standing at the moment the ball was struck. It is a list of players for each shot, so you can’t just one-hot encode it, but a football fan knows exactly what to look for in it: how many defenders are between the ball and the goal, how much space the shooter has, and whether the keeper has come off his line.
+       </p>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Freeze-frame features · final notebook
+         </span>
+         <button aria-label="Copy freeze frame code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code data-code="freeze_frame"></code></pre>
+       </div>
+       <h3>
+        3. Headers from far away
+       </h3>
+       <p>
+        A header from 15 yards is nothing like a shot with the foot from 15 yards, so we gave Logistic Regression the distance for headers only. We’ll admit now that this one barely mattered in the end, and Chapter 05 shows you why.
+       </p>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Header distance · final notebook
+         </span>
+         <button aria-label="Copy header code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code data-code="header"></code></pre>
+       </div>
+       <div class="lab" id="shot-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           Drag the players around and watch how each model scores the shot
+          </h3>
+         </div>
+        </div>
+        <p>
+         Click anywhere on the pitch to move the shooter, or drag the shooter, the defenders and the keeper wherever you like. Both numbers come from the two Logistic Regression models we actually trained, running right here in your browser, and the features are calculated exactly the way the notebook calculates them.
+        </p>
+        <div class="lab-controls">
+         <div aria-label="Body part" class="seg" id="body-buttons" role="group">
+          <button aria-pressed="true" class="active" data-body="Right Foot" type="button">
+           Right foot
+          </button>
+          <button aria-pressed="false" data-body="Left Foot" type="button">
+           Left foot
+          </button>
+          <button aria-pressed="false" data-body="Head" type="button">
+           Header
+          </button>
+         </div>
+         <div class="selects">
+          <button class="small-btn" id="add-defender" type="button">
+           + Defender
+          </button>
+          <button class="small-btn" id="remove-defender" type="button">
+           − Defender
+          </button>
+          <button class="small-btn" id="reset-shot" type="button">
+           Reset
+          </button>
+         </div>
+        </div>
+        <div aria-label="Try a situation" class="seg" role="group">
+         <button data-preset="tapin" type="button">
+          Tap-in
+         </button>
+         <button data-preset="crowded" type="button">
+          Crowded edge of the box
+         </button>
+         <button data-preset="tight" type="button">
+          Tight angle
+         </button>
+         <button data-preset="oneonone" type="button">
+          Keeper rushing out
+         </button>
+        </div>
+        <div class="lab-grid" id="shot-stage">
+         <div>
+          <svg aria-label="Attacking half of the pitch, with the goal at the top." class="pitch" id="shot-pitch" role="group" viewBox="-2 -3 84 64">
+          </svg>
+          <div class="key">
+           <span class="k-shooter">
+            Shooter
+           </span>
+           <span class="k-defender">
+            Defender (outlined when in the way)
+           </span>
+           <span class="k-keeper">
+            Keeper
+           </span>
+          </div>
+         </div>
+         <div>
+          <p class="panel-title">
+           What the engineered model sees
+           <span>
+            updated as you move
+           </span>
+          </p>
+          <table class="readings">
+           <tbody id="shot-readings">
+           </tbody>
+          </table>
+          <div class="xg-cards">
+           <div class="xg-card raw">
+            <small>
+             Raw Logistic Regression xG
+            </small>
+            <strong id="xg-raw">
+             –
+            </strong>
+            <div aria-hidden="true" class="bar-track">
+             <div class="bar-fill" id="xg-raw-bar">
+             </div>
+            </div>
+           </div>
+           <div class="xg-card engineered">
+            <small>
+             Engineered Logistic Regression xG
+            </small>
+            <strong id="xg-eng">
+             –
+            </strong>
+            <div aria-hidden="true" class="bar-track">
+             <div class="bar-fill" id="xg-eng-bar">
+             </div>
+            </div>
+           </div>
+          </div>
+          <div class="why">
+           <h4>
+            What pushes the engineered xG up or down compared with an average shot
+           </h4>
+           <div id="why-rows">
+           </div>
+          </div>
+         </div>
+        </div>
+        <p aria-live="polite" class="summary" id="shot-summary" role="status">
+        </p>
+        <details class="lab-details">
+         <summary>
+          How this demo works
+         </summary>
+         <p>
+          The notebook saves both trained models, meaning the coefficients, the intercept, and the mean and scale that StandardScaler learned for every column. The page then computes xG = 1 / (1 + e^−z), where z is the intercept plus each coefficient multiplied by (value − mean) / scale. That is exactly what sklearn’s predict_proba does for Logistic Regression, and we checked that the page gives the same xG as sklearn for the example shot the notebook prints.
+         </p>
+         <p>
+          The columns you can’t set here are held at those of an ordinary open-play shot: minute 45, first half, normal technique, regular play, and all the yes/no flags switched off. The pushes compare each part of the shot with the average shot in the training data, measured in log-odds.
+         </p>
+        </details>
+       </div>
+      </section>
+      <section class="chapter" id="rematch">
+       <span class="chapter-number">
+        CHAPTER 05
+       </span>
+       <h2>
+        The rematch with the football features
+       </h2>
+       <p>
+        For the rematch we kept the same split, the same three models and the same settings, and only added the six new columns. Before running it, we wrote down in the notebook what would count as a success, so that we couldn’t move the goalposts after seeing the numbers, which is a lesson we learned the hard way in Seoul. Logistic Regression would count as competitive if its test log loss came within 1% of XGBoost’s and its AUC within 0.01.
+       </p>
+       <div class="lab" id="score-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           Compare the scores from both rounds
+          </h3>
+         </div>
+        </div>
+        <div aria-label="Feature set" class="seg" id="feat-buttons" role="group">
+         <button aria-pressed="true" class="active" data-feats="raw" type="button">
+          Round one, with the raw columns
+         </button>
+         <button aria-pressed="false" data-feats="engineered" type="button">
+          The rematch, with football features
+         </button>
+        </div>
+        <div class="lab-controls">
+         <p class="panel-title" id="score-context" style="margin: 0">
+          Raw columns · Test log loss
+         </p>
+         <div class="selects">
+          <label>
+           Evaluate on
+           <select id="score-eval">
+            <option value="test">
+             Test
+            </option>
+            <option value="validation">
+             Validation
+            </option>
+           </select>
+          </label>
+          <label>
+           Metric
+           <select id="score-metric">
+            <option value="logloss">
+             Log loss
+            </option>
+            <option value="auc">
+             AUC
+            </option>
+           </select>
+          </label>
+         </div>
+        </div>
+        <div id="score-bars">
+        </div>
+        <p class="mini" id="score-axis">
+        </p>
+        <p aria-live="polite" class="summary" id="score-summary" role="status">
+        </p>
+        <details class="lab-details">
+         <summary>
+          All the reported scores, and how we picked the tree depth
+         </summary>
+         <div class="table-scroll">
+          <table class="plain">
+           <caption id="score-caption">
+           </caption>
+           <thead>
+            <tr>
+             <th scope="col">
+              Model
+             </th>
+             <th scope="col">
+              Val log loss
+             </th>
+             <th scope="col">
+              Val AUC
+             </th>
+             <th scope="col">
+              Test log loss
+             </th>
+             <th scope="col">
+              Test AUC
+             </th>
+            </tr>
+           </thead>
+           <tbody id="score-table">
+           </tbody>
+          </table>
+         </div>
+         <div class="table-scroll">
+          <table class="plain">
+           <caption>
+            Decision Tree validation log loss for each max_depth, with min_samples_leaf=50
+           </caption>
+           <thead>
+            <tr>
+             <th scope="col">
+              max_depth
+             </th>
+             <th scope="col">
+              Val log loss
+             </th>
+             <th scope="col">
+             </th>
+            </tr>
+           </thead>
+           <tbody id="depth-table">
+           </tbody>
+          </table>
+         </div>
+         <p class="mini">
+          A deep tree puts shots into tiny leaves and ends up giving silly probabilities like 0 or 1, which log loss punishes very hard. That is why the validation loss starts going up again after a depth of about 4 to 6.
+         </p>
+        </details>
+        <p class="source-line">
+         <a download="" href="../data/xg-results.json">
+          Download all the results as JSON ↓
+         </a>
+        </p>
+        <noscript>
+         <div class="table-scroll">
+          <table class="table">
+           <thead>
+            <tr>
+             <th>
+              Features
+             </th>
+             <th>
+              Model
+             </th>
+             <th>
+              Test log loss
+             </th>
+             <th>
+              Test AUC
+             </th>
+            </tr>
+           </thead>
+           <tbody>
+            <tr><td>Raw</td><td>Logistic Regression</td><td>0.2705</td><td>0.7441</td></tr>
+            <tr><td>Raw</td><td>Decision Tree</td><td>0.2771</td><td>0.7441</td></tr>
+            <tr><td>Raw</td><td>XGBoost</td><td>0.2547</td><td>0.7904</td></tr>
+            <tr><td>Engineered</td><td>Logistic Regression</td><td>0.2453</td><td>0.8111</td></tr>
+            <tr><td>Engineered</td><td>Decision Tree</td><td>0.2637</td><td>0.7638</td></tr>
+            <tr><td>Engineered</td><td>XGBoost</td><td>0.2464</td><td>0.8072</td></tr>
+            <tr><td>Reference</td><td>StatsBomb xG</td><td>0.2431</td><td>0.8153</td></tr>
+           </tbody>
+          </table>
+         </div>
+        </noscript>
+       </div>
+       <p>
+        On the test set, Logistic Regression went from 0.2705 down to
+        <strong>
+         0.2453
+        </strong>
+        , which is about 9% lower, while XGBoost went from 0.2547 to 0.2464, about 3% lower. Both models learned something from the football features, but Logistic Regression learned roughly three times as much, because XGBoost could already partly find these patterns in the raw x and y. Logistic Regression is now slightly ahead on the test set, and on validation the two are tied at 0.2437 and 0.2438.
+       </p>
+       <h3>
+        Did we just get lucky with the split?
+       </h3>
+       <p>
+        After Seoul we don’t trust a single split anymore, so we repeated both rounds on ten different match splits, changing only the random_state. With the raw columns, Logistic Regression lost all ten, with an average test log loss of 0.2760 against 0.2619 for XGBoost. With the football features it came out ahead on nine of the ten, but the average gap was only about 0.0014 (0.2523 against 0.2537), which is smaller than the difference between one split and the next. That is why we call the result level rather than a win for Logistic Regression.
+       </p>
+       <h3>
+        The xG check that every football fan knows
+       </h3>
+       <p>
+        A good way to sanity-check an xG model is to add up the xG of every shot in the test set and compare it with the number of goals that actually went in.
+       </p>
+       <div class="mini-grid">
+        <div class="metric">
+         <small>
+          Real goals in the test set
+         </small>
+         <strong>
+          688
+         </strong>
+        </div>
+        <div class="metric">
+         <small>
+          StatsBomb xG
+         </small>
+         <strong>
+          685.5
+         </strong>
+        </div>
+        <div class="metric">
+         <small>
+          Our Logistic Regression
+         </small>
+         <strong>
+          734.4
+         </strong>
+        </div>
+        <div class="metric">
+         <small>
+          Our XGBoost
+         </small>
+         <strong>
+          722.7
+         </strong>
+        </div>
+       </div>
+       <p>
+        StatsBomb is almost spot on, while our two models predict a few too many goals. The notebook shows why: the test matches happened to have a lower goal rate (9.15%) than the training matches (9.65%), and both of our models learned the training rate.
+       </p>
+       <div class="lab" id="coef-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           Reading the coefficients like a football fan
+          </h3>
+         </div>
+        </div>
+        <p>
+         The nice thing about Logistic Regression is that you can actually read what it learned. The features were standardised before training, so the sizes of the coefficients can be compared with each other. Green bars push the xG up and red bars push it down, and you can click any row to see what it means for a shot.
+        </p>
+        <div aria-label="Which coefficients" class="seg" id="coef-buttons" role="group">
+         <button aria-pressed="true" class="active" data-coefview="football" type="button">
+          The football features
+         </button>
+         <button aria-pressed="false" data-coefview="all" type="button">
+          All 34 columns
+         </button>
+        </div>
+        <div class="lab-grid">
+         <div class="coef-list" id="coef-list">
+         </div>
+         <div>
+          <p class="panel-title">
+           What this coefficient means
+          </p>
+          <p aria-live="polite" class="summary reading" id="coef-reading" role="status">
+          </p>
+          <p class="mini">
+           The names in bold green are the six features we engineered. The coefficients are the ones printed in the last results cell of the notebook.
+          </p>
+         </div>
+        </div>
+       </div>
+      </section>
+      <section class="chapter" id="findings">
+       <span class="chapter-number">
+        CHAPTER 06
+       </span>
+       <h2>
+        What we’re taking away from this
+       </h2>
+       <h3>
+        Knowing the game closed the gap between the two models
+       </h3>
+       <p>
+        On the raw columns, XGBoost beat Logistic Regression clearly, and it did so on all ten splits. Once we added six features that any football fan would think of, the gap was gone. By the rule we set before running the rematch, Logistic Regression is competitive, and it even edges XGBoost on nine of the ten splits, although the margins are so tiny that we’d call it level rather than a win.
+       </p>
+       <h3>
+        The simple model ended up close to the professionals
+       </h3>
+       <p>
+        On the same test shots, StatsBomb’s own xG scores a log loss of 0.2431 and an AUC of 0.8153. Our engineered Logistic Regression scores 0.2453 and 0.8111, and on top of that we can explain every one of its coefficients.
+       </p>
+       <h3>
+        This holds for this problem, and we wouldn’t turn it into a rule
+       </h3>
+       <p>
+        Football shots have a geometry that people understand very well, so domain knowledge had a lot to offer here. That won’t be true for every dataset, and it doesn’t make XGBoost pointless either, since it got the most out of the raw columns all on its own.
+       </p>
+       <details class="limitations" open="">
+        <summary>
+         Where this stops, and what is still unresolved
+        </summary>
+        <ul>
+         <li>
+          The data is one season (2015/16) of four men’s top-flight leagues, so other seasons, other leagues or the women’s game might behave differently.
+         </li>
+         <li>
+          XGBoost used the Seoul settings with early stopping rather than a proper tuning study, and a tuned XGBoost might pull ahead again, which we haven’t tested.
+         </li>
+         <li>
+          “Level” really is the honest word, because the average engineered gap is about 0.0014 log loss, which is smaller than the differences between splits.
+         </li>
+         <li>
+          We designed the features after looking at the EDA on the whole dataset. They are standard football ideas, but we didn’t keep the test matches out of the EDA.
+         </li>
+         <li>
+          Penalties, shots taken directly from corners and the 32 shots without a keeper in the freeze frame are excluded, and freeze frames only show the players who were in the camera’s view.
+         </li>
+         <li>
+          The Decision Tree depth was picked on validation data, and the check over ten splits only covers Logistic Regression and XGBoost.
+         </li>
+         <li>
+          An earlier, more complicated version of this notebook, with more freeze-frame features and extra metrics, told the same story. All the numbers here come from the final, simpler notebook.
+         </li>
+        </ul>
+        <p>
+         <strong>
+          What we would try next:
+         </strong>
+         a properly tuned XGBoost, other seasons, and the type of pass that led to the shot (a cross, a through ball or a cut-back). These are future experiments, and we’re not claiming any results from them here.
+        </p>
+       </details>
+       <p>
+        In NYC the data was hiding the signal, and in Seoul the evaluation changed the winner.
+        <br/>
+        <em>
+         Here, knowing the game is what closed the gap.
+        </em>
+       </p>
+       <div class="hero-actions">
+        <a class="btn ghost" href="dataset-2.html">
+         ← Back to Seoul Bikes
+        </a>
+        <a class="btn" href="../index.html#summary">
+         See how the three case studies fit together →
+        </a>
+       </div>
+      </section>
+      <section class="chapter" id="code">
+       <span class="chapter-number">
+        CHAPTER 07
+       </span>
+       <h2>
+        Code and sources
+       </h2>
+       <div id="code-excerpts">
+       </div>
+       <div class="note">
+        <h3>
+         What stayed the same in every run
+        </h3>
+        <p>
+         <strong>
+          Logistic Regression:
+         </strong>
+         a StandardScaler fitted on the training data, with max_iter=2000.
+         <strong>
+          Decision Tree:
+         </strong>
+         min_samples_leaf=50 and random_state=42, with max_depth set to 6 for the raw columns and 4 for the engineered ones, both picked on validation log loss.
+         <strong>
+          XGBoost:
+         </strong>
+         up to 2,000 estimators, learning_rate=0.1, early_stopping_rounds=50, n_jobs=4 and seed=42, with the validation set passed in through eval_set, exactly as in Seoul.
+        </p>
+       </div>
+       <div class="hero-actions">
+        <a class="btn ghost" download="" href="../notebooks/football-xg.ipynb">
+         Download the final notebook ↓
+        </a>
+        <a class="btn ghost" href="https://github.com/statsbomb/open-data" rel="noopener noreferrer" target="_blank">
+         StatsBomb Open Data ↗
+        </a>
+       </div>
+       <p class="source-line">
+        The data comes from StatsBomb Open Data and is used for research under the StatsBomb public data user agreement. The final Kaggle notebook keeps all its saved outputs, and every number on this page is generated from those outputs by tools/build_xg_data.py. The shots table itself is built on Kaggle by a separate dataset-build notebook. On AI use: Claude (Opus 5.5) helped with the experiments and with this page, as declared in the project’s AI disclosure.
+       </p>
+      </section>
+     </div>
+    </div>
+   </div>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-inner">
+    <span>
+     Beyond the Model · ES335 · IIT Gandhinagar
+    </span>
+    <span>
+     Dataset 3 · Football xG · Data from StatsBomb
+    </span>
+   </div>
+  </footer>
+ </body>
+</html>

@@ -7,10 +7,10 @@
   "splits": {
     "random": {
       "title": "Random rows",
-      "question": "How well do I predict held-out hours from the same observed year?",
-      "method": "Two shuffled splits: 20% test, then 25% of the remaining 80% for validation. random_state=42 in both. Final allocation: 60 / 20 / 20.",
-      "caveat": "Hours from the same date can appear in different sets. Nearby observations may share conditions, so this is not a strict future forecast.",
-      "finding": "GREAT START! XGBoost leads on validation and test, for both error metrics. But what exactly did the split let it see?",
+      "question": "How well can we predict held-out hours from the same year?",
+      "method": "We split twice with shuffling: 20% of the rows for test, then 25% of the remaining 80% for validation, both with random_state=42. That leaves 60% for training, 20% for validation and 20% for test.",
+      "caveat": "Hours from the same date can land in different sets, and nearby hours share very similar conditions, so this is not a true forecast of the future.",
+      "finding": "GREAT START! XGBoost leads on validation and on test, for both error metrics. The question we should have asked straight away is what exactly the split let it see.",
       "scores": [
         {
           "model": "Linear Regression",
@@ -90,10 +90,10 @@
     },
     "chronological": {
       "title": "Chronological",
-      "question": "How well do I predict later observations using earlier observations?",
-      "method": "The first 60% of ordered rows train the models; the next 20% validate; the final 20% test. The notebook says the date/hour order was manually verified.",
-      "caveat": "Time and season coverage change together in this one-year dataset. A different ranking does not isolate the cause of the change.",
-      "finding": "The surprise: Linear Regression has the lowest test RMSE and MAE. On validation, the tree leads both. The winner depends on which period I ask about.",
+      "question": "How well can we predict later hours using only earlier ones?",
+      "method": "The first 60% of the rows, in time order, train the models, the next 20% validate them and the last 20% test them. We checked by hand that the rows are sorted by date and then by hour.",
+      "caveat": "With only one year of data, time and season move together, so a change in the ranking cannot tell us which of the two caused it.",
+      "finding": "This was the surprise, because Linear Regression has the lowest test RMSE and MAE, while on validation the tree is best on both, so the winner depends on which part of the year we ask about.",
       "scores": [
         {
           "model": "Linear Regression",
@@ -173,10 +173,10 @@
     },
     "day": {
       "title": "Season-stratified days",
-      "question": "How well do I generalise to unseen days while representing every season?",
-      "method": "Create unique Date–Season pairs. Stratify days by Seasons into 60% training, 20% validation, 20% test with random_state=42. Assign every hour using its date mask.",
-      "caveat": "Whole days stay together, but training can still include dates later than test dates. This estimates unseen-day performance within the observed year, not future-year performance.",
-      "finding": "XGBoost leads again. Its test RMSE is 250.4534 bikes, versus 383.6370 for Linear Regression. That is 34.7% lower on this split.",
+      "question": "How well can we predict whole days we have never seen, while still covering every season?",
+      "method": "We took every unique date with its season, split the days 60/20/20 stratified by season with random_state=42, and then put each hour into the set its date belongs to.",
+      "caveat": "Whole days stay together, but training can still contain dates that come after the test dates. So this measures performance on unseen days within the same year, not on a future year.",
+      "finding": "XGBoost leads again, with a test RMSE of 250.4534 bikes against 383.6370 for Linear Regression, which is 34.7% lower on this split.",
       "scores": [
         {
           "model": "Linear Regression",

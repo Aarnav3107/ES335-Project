@@ -1,0 +1,597 @@
+/* Football xG uses the same hero, stats, report-layout, toc, chapter and lab
+   components as NYC Taxi and Seoul Bikes. Only the pitch-based interactives need extra styles. */
+.xg {
+  --pitch: #e9f0e6;
+  --pitch-line: #b7c8b9;
+  --shooter: #c78343;
+  --defender: #a95e4f;
+  --keeper: #1e302c;
+}
+
+.xg .chapter p {
+  max-width: 760px;
+}
+
+.xg blockquote {
+  margin: 28px 0;
+  padding: 20px 23px;
+  border-left: 3px solid var(--accent);
+  background: #f3f0e8;
+}
+
+.xg blockquote p {
+  margin: 0 0 12px;
+  font-style: italic;
+}
+
+.xg cite {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: normal;
+}
+
+.xg .lab .lab-head h3 {
+  font-size: 20px;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  z-index: 50;
+  padding: 10px;
+  background: white;
+}
+
+.skip:focus {
+  top: 5px;
+}
+
+/* Two-column layout used by every lab: a pitch (or chart) next to its readings. */
+.lab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 24px;
+  padding-block: 18px;
+  border-block: 1px solid var(--line);
+}
+
+.lab-grid > div {
+  min-width: 0;
+}
+
+/* Views with nothing to draw on the pitch show the bars alone, centred. */
+.lab-grid.single {
+  grid-template-columns: minmax(0, 560px);
+  justify-content: center;
+}
+
+.panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.panel-title span {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.lab-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 12px 0 18px;
+}
+
+.lab-controls .seg {
+  margin: 0;
+}
+
+.selects {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.selects label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.selects select {
+  display: block;
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.small-btn {
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  border-radius: 4px;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.small-btn:hover {
+  border-color: var(--forest);
+}
+
+.small-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lab .summary {
+  border-left: 2px solid var(--forest);
+  padding-left: 10px;
+  font-size: 13px;
+  color: var(--forest);
+  margin: 14px 0;
+}
+
+.lab-details {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+
+.lab-details summary,
+.xg .limitations summary,
+#code details summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lab .source-line,
+.xg .source-line {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* The pitch. StatsBomb units: 120 x 80 yards, we draw the attacking half with the goal at the top. */
+.pitch {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--pitch);
+  border-radius: 6px;
+  touch-action: none;
+  user-select: none;
+}
+
+.pitch .line {
+  fill: none;
+  stroke: var(--pitch-line);
+  stroke-width: 0.35;
+}
+
+.pitch .goal {
+  fill: var(--ink);
+}
+
+.pitch .spot {
+  fill: var(--pitch-line);
+}
+
+.pitch .cone {
+  fill: rgba(33, 102, 87, 0.14);
+  stroke: rgba(33, 102, 87, 0.55);
+  stroke-width: 0.25;
+  stroke-dasharray: 0.8 0.6;
+  pointer-events: none;
+}
+
+.pitch .player {
+  cursor: grab;
+  stroke: white;
+  stroke-width: 0.45;
+}
+
+.pitch .player:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 0.9;
+}
+
+.pitch .player.dragging {
+  cursor: grabbing;
+}
+
+.pitch .shooter {
+  fill: var(--shooter);
+}
+
+.pitch .defender {
+  fill: var(--defender);
+}
+
+.pitch .defender.in-the-way {
+  stroke: var(--ink);
+  stroke-width: 0.7;
+}
+
+.pitch .keeper {
+  fill: var(--keeper);
+}
+
+.pitch .player-label {
+  font: 600 2.1px 'DM Sans', sans-serif;
+  fill: white;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.pitch .closest-line {
+  stroke: var(--defender);
+  stroke-width: 0.3;
+  stroke-dasharray: 0.6 0.5;
+  pointer-events: none;
+}
+
+.pitch .band-label {
+  font: 500 2.2px 'DM Mono', monospace;
+  fill: var(--ink);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.key span::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: -1px;
+  background: var(--dot);
+}
+
+.key .k-shooter { --dot: var(--shooter); }
+.key .k-defender { --dot: var(--defender); }
+.key .k-keeper { --dot: var(--keeper); }
+
+/* Readings next to the pitch. */
+.readings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.readings th,
+.readings td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.readings td {
+  text-align: right;
+  font: 500 12px 'DM Mono', monospace;
+}
+
+.readings th small {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.xg-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.xg-card {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fcfcf9;
+  padding: 12px;
+}
+
+.xg-card small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.xg-card strong {
+  display: block;
+  font: 700 28px 'Libre Baskerville', serif;
+  margin: 4px 0 2px;
+}
+
+.xg-card.engineered strong {
+  color: var(--forest);
+}
+
+.xg-card .bar-track {
+  height: 8px;
+  margin: 6px 0 0;
+}
+
+.xg-card.raw .bar-fill {
+  background: #91a292;
+}
+
+.why {
+  margin-top: 14px;
+}
+
+.why h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.why-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  margin: 4px 0;
+}
+
+.why-bar {
+  position: relative;
+  height: 8px;
+  background: #edf0e9;
+  border-radius: 2px;
+}
+
+.why-bar span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+}
+
+.why-bar .up {
+  left: 50%;
+  background: var(--forest);
+}
+
+.why-bar .down {
+  right: 50%;
+  background: var(--defender);
+}
+
+.why-bar::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--muted);
+}
+
+/* Bars shared by the EDA, scoreboard and coefficient labs. */
+.bar-row {
+  margin-bottom: 11px;
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.bar-label strong {
+  font: 500 12px 'DM Mono', monospace;
+}
+
+.xg .lab .bar-track {
+  height: 9px;
+  margin: 5px 0 0;
+}
+
+.xg .lab .bar-fill {
+  background: #91a292;
+}
+
+.bar-row.lead .bar-label {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.xg .lab .bar-row.lead .bar-fill {
+  background: var(--forest);
+}
+
+.bar-row.reference .bar-label {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.xg .lab .bar-row.reference .bar-fill {
+  background: repeating-linear-gradient(45deg, #c9d2c8 0 4px, #e3e8e0 4px 8px);
+}
+
+/* Coefficients: diverging bars around zero. */
+.coef-list {
+  display: grid;
+  gap: 3px;
+}
+
+.coef-row {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) 54px;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 3px 4px;
+  border-radius: 3px;
+  text-align: left;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.coef-row:hover,
+.coef-row.selected {
+  background: var(--highlight);
+}
+
+.coef-row .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coef-row.engineered .name {
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.coef-row .value {
+  font: 11px 'DM Mono', monospace;
+  text-align: right;
+}
+
+.coef-track {
+  position: relative;
+  height: 10px;
+}
+
+.coef-track::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: var(--muted);
+}
+
+.coef-track span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+}
+
+.coef-track .up {
+  left: 50%;
+  background: var(--forest);
+}
+
+.coef-track .down {
+  right: 50%;
+  background: var(--defender);
+}
+
+.reading {
+  min-height: 72px;
+}
+
+.xg .mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 22px 0;
+}
+
+#code details {
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+}
+
+#code details .code-block {
+  margin-top: 16px;
+}
+
+.xg .limitations {
+  margin-top: 28px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.lab table.plain {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.lab table.plain th,
+.lab table.plain td {
+  padding: 8px 7px;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.lab table.plain th:first-child,
+.lab table.plain td:first-child {
+  text-align: left;
+}
+
+.lab table.plain caption {
+  text-align: left;
+  margin: 15px 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .lab-grid,
+  .lab-grid.single {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding-block: 12px;
+  }
+
+  .xg .mini-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .coef-row {
+    grid-template-columns: 120px minmax(0, 1fr) 46px;
+  }
+}
+
+@media (max-width: 600px) {
+  .lab-controls {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .xg .lab .lab-head .tag {
+    display: none;
+  }
+
+}

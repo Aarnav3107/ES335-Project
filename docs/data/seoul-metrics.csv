@@ -1,0 +1,10 @@
+split,model,validation_rmse,validation_mae,test_rmse,test_mae
+random,Linear Regression,374.4176,281.8237,376.536,285.8975
+random,Decision Tree,288.5615,181.2777,295.6182,183.0501
+random,XGBoost,232.9298,149.5629,244.4034,155.7212
+chronological,Linear Regression,607.0256,513.4486,369.8886,277.0216
+chronological,Decision Tree,472.4594,342.2714,517.6507,348.0296
+chronological,XGBoost,483.4648,395.9133,499.4878,377.6833
+day,Linear Regression,362.9971,269.6009,383.637,293.1267
+day,Decision Tree,311.2711,203.6951,290.6824,186.1559
+day,XGBoost,258.5067,164.8088,250.4534,166.0807

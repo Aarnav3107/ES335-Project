@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="How messy data hid a perfectly good feature: a first-person NYC Taxi trip-duration investigation for ES335." name="description"/>
+  <title>
+   NYC Taxi · How messy data hid a good feature | Beyond the Model
+  </title>
+  <link href="../css/style.css?v=20261116-home1" rel="stylesheet"/>
+  <link href="../css/nyc.css?v=20261116-home1" rel="stylesheet"/>
+ </head>
+ <body class="nyc">
+  <header class="site-header">
+   <nav class="nav">
+    <a class="logo" href="../index.html">
+     Beyond
+     <span class="logo-mark">
+      .
+     </span>
+     the Model
+    </a>
+    <div class="nav-links">
+     <a href="../index.html">
+      Home
+     </a>
+     <a aria-current="page" href="../datasets/nyc-taxi.html">
+      NYC Taxi
+     </a>
+     <a href="../datasets/dataset-2.html">
+      Seoul Bikes
+     </a>
+     <a href="../datasets/dataset-3.html">
+      Football xG
+     </a>
+     <a href="../index.html#summary">
+      Summary
+     </a>
+    </div>
+   </nav>
+  </header>
+  <main>
+   <section class="wrap hero" style="padding-bottom: 40px">
+    <span class="eyebrow">
+     Case study 01 / NYC Yellow Taxi, January 2016 / Regression
+    </span>
+    <h1>
+     How messy data hid a perfectly good feature
+    </h1>
+    <p class="lead">
+     We wanted to predict how long a New York taxi trip will take, using only what we know when the passenger gets in. The obvious feature, the distance between pickup and dropoff, did almost nothing at first, and it took a lot of digging through the data before we understood why. That digging turned out to be the real lesson of this case study.
+    </p>
+    <div class="hero-actions">
+     <a class="btn" href="#problem">
+      Start exploring ↓
+     </a>
+     <a class="btn ghost" href="../notebooks/nyc-taxi.ipynb">
+      Read the original notebook
+     </a>
+    </div>
+   </section>
+   <div class="wrap">
+    <div class="statrow">
+     <div class="stat">
+      <strong>
+       10.9M
+      </strong>
+      <small>
+       Taxi trips in January 2016 before any cleaning
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       97.68%
+      </strong>
+      <small>
+       Trips that were kept after our cleaning rules
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       27.6%
+      </strong>
+      <small>
+       Lower Linear Regression RMSE once Haversine distance was added to the cleaned data
+      </small>
+     </div>
+    </div>
+    <div class="report-layout">
+     <aside aria-label="Page chapters" class="toc">
+      <span>
+       On this page
+      </span>
+      <a href="#problem">
+       01 / The problem
+      </a>
+      <a href="#cleaning">
+       02 / Cleaning the data
+      </a>
+      <a href="#features">
+       03 / Feature engineering
+      </a>
+      <a href="#models">
+       04 / Comparing models
+      </a>
+      <a href="#findings">
+       05 / Findings
+      </a>
+      <a href="#code">
+       Code &amp; sources
+      </a>
+     </aside>
+     <div>
+      <section class="chapter" id="problem">
+       <span class="chapter-number">
+        CHAPTER 01
+       </span>
+       <h2>
+        What we are trying to predict
+       </h2>
+       <p>
+        The question itself is simple: when a passenger gets into a taxi, can we estimate how many minutes the trip will take? At that moment we know where they are, where they want to go, how many passengers there are and what time it is. The target is the difference between the dropoff and pickup timestamps, measured in minutes.
+       </p>
+       <p>
+        There is one rule you have to be really strict about here. Some columns are only known once the trip is over, like the dropoff time, the distance the meter recorded and the average speed. If any of those sneak into the model it will look brilliant on paper and be useless in practice, because it is basically reading the answer. We still used those columns to hunt down broken records, but none of them goes into the model.
+       </p>
+       <div class="known" aria-label="Which columns the model may use">
+        <div class="yes">
+         <h4>
+          Known when the passenger gets in, so the model can use it
+         </h4>
+         <div class="chips">
+          <span>pickup_latitude</span><span>pickup_longitude</span><span>dropoff_latitude</span><span>dropoff_longitude</span><span>passenger_count</span><span>pickup time</span>
+         </div>
+        </div>
+        <div class="no">
+         <h4>
+          Only known after the trip, so it stays out of the model
+         </h4>
+         <div class="chips">
+          <span>dropoff time</span><span>trip_distance</span><span>avg_speed_mph</span>
+         </div>
+        </div>
+       </div>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Deriving the target from the timestamps · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>jan16_data['pickup'] = pd.to_datetime(jan16_data['tpep_pickup_datetime'])
+jan16_data['dropoff'] = pd.to_datetime(jan16_data['tpep_dropoff_datetime'])
+jan16_data['total_duration'] = (jan16_data['dropoff'] - jan16_data['pickup']).dt.total_seconds() / 60</code></pre>
+       </div>
+       <div class="note">
+        <strong>
+         How the experiments were set up:
+        </strong>
+        every model was trained on the same reproducible sample of 500,000 trips with a random 75/25 train/test split. We had originally planned a time-based split as well, and since that experiment hasn’t been run yet, nothing on this page should be read as a forecast for future months.
+       </div>
+      </section>
+      <section class="chapter" id="cleaning">
+       <span class="chapter-number">
+        CHAPTER 02
+       </span>
+       <h2>
+        Why the obvious feature didn’t work at first
+       </h2>
+       <p>
+        Our first attempt at using distance was a real disappointment. We computed the straight-line distance between pickup and dropoff, gave it to Linear Regression, and the RMSE barely moved: 52.7959 minutes without it and 52.7962 with it. A trip’s length has to matter for how long it takes, so that result made no sense, and we went back to look at the data itself.
+       </p>
+       <p>
+        When we looked closely, the data turned out to be full of problems. More than 150,000 trips had a pickup at coordinates of exactly zero, some locations were nowhere near New York, more than eleven thousand trips had a duration of zero or less, and one trip supposedly lasted 83 days. Before trying any stronger model, we needed a clear definition of which trips we were actually going to model.
+       </p>
+       <div class="lab" id="case-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           The case file: five kinds of trips that can’t be real
+          </h3>
+          <p>
+           Click through each problem we found in the notebook. Each one shows the evidence and the rule we ended up writing to deal with it.
+          </p>
+         </div>
+        </div>
+        <div aria-label="Choose a problem" class="seg" role="group">
+         <button aria-pressed="true" class="active" data-case="negative" type="button">
+          Negative durations
+         </button>
+         <button aria-pressed="false" data-case="long" type="button">
+          The 83-day trip
+         </button>
+         <button aria-pressed="false" data-case="nearday" type="button">
+          Almost 24 hours
+         </button>
+         <button aria-pressed="false" data-case="speed" type="button">
+          Impossible speeds
+         </button>
+         <button aria-pressed="false" data-case="ocean" type="button">
+          Trips from the ocean
+         </button>
+        </div>
+        <div class="split-grid">
+         <div>
+          <div aria-live="polite" class="case-big" id="case-big">
+          </div>
+          <div class="case-unit" id="case-unit">
+          </div>
+          <p class="case-text" id="case-text">
+          </p>
+          <div class="case-rule" id="case-rule">
+          </div>
+         </div>
+         <div id="case-visual">
+         </div>
+        </div>
+        <p class="source-line">
+         Every number here is a printed output from the notebook, taken at the point in the cleaning where we found it.
+        </p>
+       </div>
+       <div class="lab" id="cleaning-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           How the correlations change after cleaning
+          </h3>
+          <p>
+           Switch between the two snapshots we recorded in the notebook. The “after” numbers come from all of the cleaning rules together, not only from removing the zero coordinates.
+          </p>
+         </div>
+        </div>
+        <div aria-label="Cleaning state" class="seg" role="group">
+         <button aria-pressed="true" class="active" data-clean="raw">
+          Before cleaning
+         </button>
+         <button aria-pressed="false" data-clean="clean">
+          After cleaning
+         </button>
+        </div>
+        <div class="metric-grid">
+         <div class="metric">
+          <small>
+           Haversine distance vs the distance the meter recorded
+          </small>
+          <strong aria-live="polite" id="corr-distance">
+           0.0105
+          </strong>
+          <div class="bar-track">
+           <div class="bar-fill" id="corr-distance-bar">
+           </div>
+          </div>
+         </div>
+         <div class="metric">
+          <small>
+           Haversine distance vs trip duration
+          </small>
+          <strong aria-live="polite" id="corr-duration">
+           0.0002
+          </strong>
+          <div class="bar-track">
+           <div class="bar-fill" id="corr-duration-bar">
+           </div>
+          </div>
+         </div>
+        </div>
+        <p aria-live="polite" id="correlation-explanation">
+        </p>
+       </div>
+       <h3 class="subhead">
+        The cleaning rules we settled on
+       </h3>
+       <p>
+        Think of these as limits on what we chose to model rather than proof that every removed trip was garbage, because some genuine long journeys will have been thrown out along with the broken ones. We kept trips that lasted more than 0 and at most 120 minutes, had a recorded distance between 0 and 50 miles, had an average speed of at most 100 mph, and started and ended inside a rough box around the New York region that we put together from coordinates we found online.
+       </p>
+       <div class="lab" id="cutoff-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           Where should the duration and distance cutoffs go?
+          </h3>
+          <p>
+           Picking a threshold is a judgement call, so we looked at how many trips sit above each candidate. Click a bar to see what that cutoff would mean.
+          </p>
+         </div>
+        </div>
+        <div aria-label="Which cutoff" class="seg" role="group">
+         <button aria-pressed="true" class="active" data-cutoff="duration" type="button">
+          Trip duration
+         </button>
+         <button aria-pressed="false" data-cutoff="distance" type="button">
+          Recorded distance
+         </button>
+        </div>
+        <div id="cutoff-chart">
+        </div>
+        <p aria-live="polite" class="summary" id="cutoff-summary" role="status">
+        </p>
+        <p class="source-line" id="cutoff-source">
+        </p>
+       </div>
+       <div class="lab" id="funnel-lab">
+        <h3>
+         How many trips survive each cleaning step
+        </h3>
+        <p>
+         Each bar shows how many trips that rule removed, and the number underneath is how many were left afterwards.
+        </p>
+        <div id="funnel">
+        </div>
+       </div>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          The final cleaning code · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>cleaned_data = jan16_data.copy()
+# Starting over for easy cleaning
+print(f"{len(cleaned_data)} -&gt; ", end=" ")
+cleaned_data = cleaned_data[(cleaned_data['total_duration']&gt;0) &amp; (cleaned_data['total_duration']&lt;=120)]
+print(f"{len(cleaned_data)} -&gt; ", end=" ")
+cleaned_data = cleaned_data[(cleaned_data['trip_distance']&gt;0) &amp; (cleaned_data['trip_distance']&lt;=50)]
+print(f"{len(cleaned_data)} -&gt; ", end=" ")
+
+cleaned_data['avg_speed_mph'] = cleaned_data['trip_distance'] * 60 / cleaned_data['total_duration']
+cleaned_data = cleaned_data[(cleaned_data['avg_speed_mph'] &gt; 0) &amp; (cleaned_data['avg_speed_mph'] &lt;= 100)]
+print(f"{len(cleaned_data)} -&gt; ", end=" ")
+# FOUND COORDS FOR NYC REGION ONLINE AND MADE ROUGH BOUNDING BOX
+cleaned_data = cleaned_data[
+    cleaned_data["pickup_latitude"].between(40, 42) &amp;
+    cleaned_data["dropoff_latitude"].between(40, 42) &amp;
+    cleaned_data["pickup_longitude"].between(-75, -72) &amp;
+    cleaned_data["dropoff_longitude"].between(-75, -72)
+]
+print(f"{len(cleaned_data)}")</code></pre>
+       </div>
+       <p class="mini">
+        One thing to be careful about: these rules remove trips based on their duration, distance and speed, so the set of trips we evaluate on changes as well. That means comparing the RMSE on the raw data with the RMSE on the cleaned data doesn’t cleanly measure how much the cleaning helped the model during training.
+       </p>
+      </section>
+      <section class="chapter" id="features">
+       <span class="chapter-number">
+        CHAPTER 03
+       </span>
+       <h2>
+        Giving the model a distance instead of four coordinates
+       </h2>
+       <h3>
+        Baseline
+       </h3>
+       <p>
+        Every comparison on this page is measured against the same baseline: Linear Regression on the original columns, meaning the pickup and dropoff coordinates and the passenger count, with no engineered features at all. We ran it at three stages of cleaning, so you can see how much the data alone changed it before any feature or stronger model was added. Keep in mind the caveat from Chapter 02, though: cleaning also changes which trips are evaluated, so the first two numbers aren’t directly comparable with the third.
+       </p>
+       <div class="baseline-grid">
+        <div class="metric">
+         <small>
+          Raw January 2016 data
+         </small>
+         <strong>
+          57.2100
+         </strong>
+         <em>
+          RMSE in minutes · MAE 10.2018
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          Partially cleaned data
+         </small>
+         <strong>
+          52.7959
+         </strong>
+         <em>
+          RMSE in minutes · MAE 9.8636
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          Final cleaned data
+         </small>
+         <strong>
+          8.9366
+         </strong>
+         <em>
+          RMSE in minutes · MAE 6.4234
+         </em>
+        </div>
+       </div>
+       <p>
+        A linear model sees four raw numbers, the latitude and longitude of the pickup and of the dropoff, and it has no way of turning them into a distance by itself, because distance on a sphere isn’t a weighted sum of coordinates. The Haversine formula does that conversion for us. The information was always in the data, and this feature simply hands it to the model in a form it can use.
+       </p>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Haversine distance, vectorised · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>def haversine_distance(lat1, lon1, lat2, lon2):
+    R = 3958.8  # Earth radius in miles
+
+    lat1 = np.radians(lat1)
+    lon1 = np.radians(lon1)
+    lat2 = np.radians(lat2)
+    lon2 = np.radians(lon2)
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = (
+        np.sin(dlat / 2)**2
+        + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
+    )
+
+    c = 2 * np.arcsin(np.sqrt(a))
+
+    return R * c
+
+cleaned_data["haversine_distance"] = haversine_distance(
+    cleaned_data["pickup_latitude"],
+    cleaned_data["pickup_longitude"],
+    cleaned_data["dropoff_latitude"],
+    cleaned_data["dropoff_longitude"]
+)</code></pre>
+       </div>
+       <div class="lab">
+        <h3>
+         What one engineered feature did for the same model
+        </h3>
+        <p>
+         On the final cleaned sample, adding Haversine distance took Linear Regression from an RMSE of 8.9366 minutes down to 6.4735 minutes.
+        </p>
+        <div class="metric-grid">
+         <div class="metric">
+          <small>
+           With only the original coordinates
+          </small>
+          <strong>
+           8.9366
+           <em>
+            min RMSE
+           </em>
+          </strong>
+         </div>
+         <div class="metric">
+          <small>
+           With Haversine distance added
+          </small>
+          <strong>
+           6.4735
+           <em>
+            min RMSE
+           </em>
+          </strong>
+         </div>
+        </div>
+        <div class="callout">
+         <div class="big">
+          27.6% lower RMSE
+         </div>
+         <div class="mini">
+          Both runs used the same sampled rows and the same split settings, so the only thing that changed between them is the feature.
+         </div>
+        </div>
+       </div>
+       <h3 class="subhead">
+        Does the time of the trip add anything?
+       </h3>
+       <p>
+        Next we added the day of the week and the pickup hour, both one-hot encoded, because rush hour on a Monday is obviously not the same as 3 a.m. on a Sunday. Linear Regression improved again, although by much less than it did when we gave it distance.
+       </p>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Extracting the day of the week · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>cleaned_data['pickup_day'] = cleaned_data['pickup'].dt.dayofweek</code></pre>
+       </div>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          One-hot encoding the weekday · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>cleaned_data = pd.get_dummies(cleaned_data, columns=['pickup_day'], prefix='day', drop_first=True, dtype=int)</code></pre>
+       </div>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Extracting and encoding the pickup hour · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>cleaned_data['hour'] = cleaned_data['pickup'].dt.hour
+cleaned_data = pd.get_dummies(cleaned_data, columns=['hour'], prefix='hour', drop_first=True, dtype=int)
+cleaned_data.columns</code></pre>
+       </div>
+       <div class="warning">
+        <strong>
+         A bug we found later:
+        </strong>
+        the run recorded here built the hour feature list with
+        <code>
+         range(1, 23)
+        </code>
+        , which leaves out
+        <code>
+         hour_23
+        </code>
+        . The notebook code now uses
+        <code>
+         range(1, 24)
+        </code>
+        , but the pickup-hour scores on this page still come from the run before that fix, and we still need to rerun it.
+       </div>
+      </section>
+      <section class="chapter" id="models">
+       <span class="chapter-number">
+        CHAPTER 04
+       </span>
+       <h2>
+        Do better features or a stronger model help more?
+       </h2>
+       <p>
+        Now we can run the experiment that the whole project is built around, the one inspired by the data-centric benchmarking paper. We either keep the features fixed and swap the model, or keep the model fixed and add features, and then we see which of the two changes moves the error more.
+       </p>
+       <div class="lab" id="model-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           Follow each model as the features are added
+          </h3>
+          <p>
+           Moving to the right adds features, and moving between lines swaps the model. Click any point to see its scores. Only the combinations we actually ran in the notebook have a point, so a line with gaps simply means we didn’t run that model at that stage.
+          </p>
+         </div>
+        </div>
+        <div class="lab-controls" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+         <div aria-label="Error metric" class="seg" role="group" style="margin:0">
+          <button aria-pressed="true" class="active" data-metric="rmse" type="button">
+           RMSE
+          </button>
+          <button aria-pressed="false" data-metric="mae" type="button">
+           MAE
+          </button>
+         </div>
+         <div class="legend-dots">
+          <span class="linear">Linear Regression</span><span class="tree">Decision Tree</span><span class="boost">Histogram Gradient Boosting</span>
+         </div>
+        </div>
+        <div class="split-grid">
+         <div id="stage-chart">
+         </div>
+         <div class="point-detail" id="point-detail">
+         </div>
+        </div>
+        <p aria-live="polite" class="summary" id="stage-summary" role="status">
+        </p>
+        <hr class="hr"/>
+        <details class="lab-details">
+         <summary>
+          All the measured stages side by side
+         </summary>
+        <p>
+         You can step through the stages in the chart above, or read every recorded score in this table.
+        </p>
+        <div class="table-wrap">
+         <table class="table" id="model-table">
+          <thead>
+           <tr>
+            <th>
+             Features
+            </th>
+            <th>
+             Model
+            </th>
+            <th>
+             RMSE ↓
+            </th>
+            <th>
+             MAE ↓
+            </th>
+           </tr>
+          </thead>
+          <tbody>
+           <tr>
+            <td>
+             Raw coordinates
+            </td>
+            <td>
+             Linear Regression
+            </td>
+            <td>
+             8.9366
+            </td>
+            <td>
+             6.4234
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Haversine
+            </td>
+            <td>
+             Linear Regression
+            </td>
+            <td>
+             6.4735
+            </td>
+            <td>
+             4.3766
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Haversine
+            </td>
+            <td>
+             Decision Tree
+            </td>
+            <td>
+             6.2860
+            </td>
+            <td>
+             4.1926
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Weekday
+            </td>
+            <td>
+             Linear Regression
+            </td>
+            <td>
+             6.4117
+            </td>
+            <td>
+             4.3291
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Weekday
+            </td>
+            <td>
+             Decision Tree
+            </td>
+            <td>
+             5.9596
+            </td>
+            <td>
+             3.9205
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Pickup hour
+            </td>
+            <td>
+             Linear Regression
+            </td>
+            <td>
+             6.2453
+            </td>
+            <td>
+             4.1858
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Pickup hour
+            </td>
+            <td>
+             Decision Tree
+            </td>
+            <td>
+             5.8409
+            </td>
+            <td>
+             3.7339
+            </td>
+           </tr>
+           <tr>
+            <td>
+             + Pickup hour
+            </td>
+            <td>
+             Histogram Boosting
+            </td>
+            <td>
+             4.8957
+            </td>
+            <td>
+             3.1181
+            </td>
+           </tr>
+          </tbody>
+         </table>
+        </div>
+        </details>
+       </div>
+       <h3 class="subhead">
+        An early warning about letting a tree grow as deep as it likes
+       </h3>
+       <p>
+        Early on, before the final cleaning, we trained a decision tree with no depth limit at all. It fit the training data almost perfectly, with an RMSE of 4.8801, and then fell apart on the test set with an RMSE of 138.5187. That is a textbook case of overfitting. It isn’t a fair comparison with the final scores, though, because that tree was trained on the early, half-cleaned data.
+       </p>
+       <p>
+        Next to it we’ve put the boosting model from the final run, which scored 4.6653 on its own training data and 4.8957 on the test set. The question to ask of any model is how much worse it gets on data it hasn’t seen, and these two are about as different as it gets.
+       </p>
+       <div class="gap-grid" id="gap-grid">
+       </div>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Decision Tree training · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>main_tree_model = DecisionTreeRegressor(max_depth=14, random_state=42)
+main_tree_model.fit(main_X_train, main_y_train)
+main_tree_predict = main_tree_model.predict(main_X_test)
+print(f'RMSE score of the Tree Model on Cleaned Data + Time + Hour: {root_mean_squared_error(main_y_test, main_tree_predict):.4f}')
+print(f'MAE: {mean_absolute_error(main_y_test, main_tree_predict):.4f}')</code></pre>
+       </div>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          Histogram Gradient Boosting · original notebook
+         </span>
+         <button aria-label="Copy code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>from sklearn.ensemble import HistGradientBoostingRegressor
+main_grad_model = HistGradientBoostingRegressor(
+    max_iter=2000,
+    learning_rate=0.05,
+    max_leaf_nodes=25
+)
+main_grad_model.fit(main_X_train, main_y_train)
+main_grad_predict = main_grad_model.predict(main_X_test)
+print(f'RMSE score of the gradboost Model on Cleaned Data + Distance: {root_mean_squared_error(main_y_test, main_grad_predict):.4f}')
+print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code></pre>
+       </div>
+       <div class="warning">
+        <strong>
+         Two numbers we still need to reconcile:
+        </strong>
+        our experiment log mentions a tuned tree with an RMSE of 5.4765, but the final tree cell in the notebook outputs 5.8409. The lab uses the
+        <em>
+         notebook value
+        </em>
+        until we rerun and record the better tree properly. The log also describes picking the depth on validation data, but that step isn’t in the notebook.
+       </div>
+      </section>
+      <section class="chapter" id="findings">
+       <span class="chapter-number">
+        CHAPTER 05
+       </span>
+       <h2>
+        What we can and can’t conclude from this
+       </h2>
+       <p>
+        On the cleaned NYC sample, giving Linear Regression a meaningful geographic feature improved it a lot, and the weekday and hour features added smaller gains on top of that. The tree and the boosting model did better still with the final features, so the choice of model clearly mattered too.
+       </p>
+       <div class="callout">
+        <strong>
+         Our takeaway from this case study:
+        </strong>
+        the way you represent your data can be one of the biggest sources of improvement you have, but it doesn’t make choosing a good model irrelevant.
+       </div>
+       <p>
+        <strong>
+         There are real limits to this.
+        </strong>
+        We used a random train/test split instead of the time-based split we had planned, our duration and speed limits throw away some trips that were probably genuine, and the hour features still need a rerun after the bug fix. So please treat this as an exploration of one month in one city, and not as a rule for every tabular problem.
+       </p>
+       <p>
+        The starting point for all of this was
+        <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html">
+         the NeurIPS 2024 paper on data-centric evaluation of tabular models
+        </a>
+        . NYC Taxi was our first test of that idea, and the other two case studies check whether its lessons carry over to different problems.
+       </p>
+       <div class="hero-actions">
+        <a class="btn" href="dataset-2.html">
+         Continue to Seoul Bikes →
+        </a>
+        <a class="btn ghost" href="../research/experiments.md">
+         Read our experiment log
+        </a>
+       </div>
+      </section>
+      <section class="chapter" id="code">
+       <span class="chapter-number">
+        REPRODUCIBILITY
+       </span>
+       <h2>
+        Code and sources
+       </h2>
+       <p>
+        Every code block on this page is copied directly from the notebook rather than rewritten for the website. The full notebook and our hand-written experiment log are in the repository as well, if you want to follow the whole process.
+       </p>
+       <div class="hero-actions">
+        <a class="btn ghost" href="../notebooks/nyc-taxi.ipynb">
+         Full notebook ↗
+        </a>
+        <a class="btn ghost" href="../research/experiments.md">
+         Experiment log ↗
+        </a>
+        <a class="btn ghost" href="https://www.kaggle.com/datasets/elemento/nyc-yellow-taxi-trip-data">
+         Data source ↗
+        </a>
+       </div>
+       <p class="mini">
+        The dataset itself isn’t included in this site. The notebook reads it from Kaggle paths, so you’ll need to attach the dataset on Kaggle to run it.
+       </p>
+      </section>
+     </div>
+    </div>
+   </div>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-inner">
+    <span>
+     Beyond the Model · ES335 · IIT Gandhinagar
+    </span>
+    <span>
+     <a href="../notebooks/nyc-taxi.ipynb">
+      Notebook
+     </a>
+     ·
+     <a href="../research/experiments.md">
+      Experiment log
+     </a>
+     ·
+     <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html">
+      Foundation paper ↗
+     </a>
+    </span>
+   </div>
+  </footer>
+  <script defer="" src="../js/common.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/nyc-data.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/nyc.js?v=20261116-home1">
+  </script>
+ </body>
+</html>

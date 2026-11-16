@@ -1,0 +1,463 @@
+/* NYC Taxi uses the shared hero, stats, report-layout, toc, chapter and lab components.
+   These styles add the case file, the cutoff explorer, the funnel, the stage chart and the overfitting bars. */
+.nyc {
+  --linear: #216657;
+  --tree: #c78343;
+  --boost: #a95e4f;
+  --removed: #a95e4f;
+}
+
+.nyc .lab .lab-head h3 {
+  font-size: 20px;
+}
+
+.nyc .summary {
+  border-left: 2px solid var(--forest);
+  padding-left: 10px;
+  font-size: 13px;
+  color: var(--forest);
+  margin: 14px 0;
+  max-width: none;
+}
+
+.nyc .source-line {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.panel-title span {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  padding-block: 18px;
+  border-block: 1px solid var(--line);
+}
+
+.split-grid > div {
+  min-width: 0;
+}
+
+/* Chapter 01: what the model may and may not see. */
+.known {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.known > div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  padding: 16px 18px;
+}
+
+.known h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.known .yes h4 {
+  color: var(--forest);
+}
+
+.known .no h4 {
+  color: var(--rose);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chips span {
+  font: 500 11px 'DM Mono', monospace;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--highlight);
+  color: var(--forest);
+}
+
+.known .no .chips span {
+  background: #f6e9e4;
+  color: var(--rose);
+  text-decoration: line-through;
+}
+
+/* Chapter 02: the case file. */
+.case-big {
+  font: 700 clamp(30px, 4vw, 44px)/1.1 'Libre Baskerville', serif;
+  color: var(--forest);
+  margin: 4px 0 2px;
+}
+
+.case-unit {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.case-text {
+  font-size: 14px;
+  margin: 14px 0 0;
+}
+
+.case-rule {
+  margin-top: 14px;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 5px;
+  background: #f3f0e8;
+  border-left: 3px solid var(--accent);
+}
+
+.ladder-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 96px;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+  margin: 8px 0;
+}
+
+.ladder-row .bar-track {
+  height: 10px;
+  margin: 0;
+}
+
+.ladder-row .value {
+  font: 500 11px 'DM Mono', monospace;
+  text-align: right;
+}
+
+.ladder-row.extreme .bar-fill {
+  background: var(--rose);
+}
+
+.ladder-note {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.diagram text {
+  font: 11px 'DM Sans', sans-serif;
+  fill: var(--ink);
+}
+
+.diagram .muted {
+  fill: var(--muted);
+  font-size: 10px;
+}
+
+.diagram .axis {
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.diagram .tick {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.diagram .marker {
+  fill: var(--rose);
+}
+
+.diagram .band {
+  fill: rgba(169, 94, 79, 0.15);
+}
+
+.diagram .route {
+  stroke: var(--rose);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  fill: none;
+}
+
+.diagram .place {
+  fill: var(--forest);
+}
+
+/* Cutoff explorer: vertical bars you can click. */
+.cutoff-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cutoff-chart .bar {
+  fill: #b7c4b9;
+  cursor: pointer;
+}
+
+.cutoff-chart .bar.chosen {
+  fill: var(--forest);
+}
+
+.cutoff-chart .bar.selected {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.cutoff-chart .bar:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.cutoff-chart text {
+  font: 10px 'DM Mono', monospace;
+  fill: var(--muted);
+}
+
+.cutoff-chart .count {
+  fill: var(--ink);
+  font-weight: 500;
+}
+
+.cutoff-chart .baseline {
+  stroke: var(--line);
+}
+
+/* Funnel: what each cleaning rule removed. */
+.funnel-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 100px;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.funnel-row:last-child {
+  border-bottom: 0;
+}
+
+.funnel-row .remaining {
+  font: 500 12px 'DM Mono', monospace;
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+}
+
+.funnel-row .bar-track {
+  height: 12px;
+  margin: 0;
+}
+
+.funnel-row .bar-fill {
+  background: var(--removed);
+}
+
+.funnel-row .removed {
+  font: 500 12px 'DM Mono', monospace;
+  text-align: right;
+}
+
+.funnel-total {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+/* Chapter 04: the stage chart. */
+.stage-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.stage-chart .grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.stage-chart text {
+  font: 10px 'DM Mono', monospace;
+  fill: var(--muted);
+}
+
+.stage-chart .stage-label {
+  font: 600 11px 'DM Sans', sans-serif;
+  fill: var(--ink);
+}
+
+.stage-chart .series {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.stage-chart .point {
+  stroke: white;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.stage-chart .point.selected {
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+
+.stage-chart .point:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.stage-chart .linear { stroke: var(--linear); fill: var(--linear); }
+.stage-chart .tree { stroke: var(--tree); fill: var(--tree); }
+.stage-chart .boost { stroke: var(--boost); fill: var(--boost); }
+.stage-chart .series.linear,
+.stage-chart .series.tree,
+.stage-chart .series.boost { fill: none; }
+
+.legend-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
+.legend-dots span::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: -1px;
+  background: var(--dot);
+}
+
+.legend-dots .linear { --dot: var(--linear); }
+.legend-dots .tree { --dot: var(--tree); }
+.legend-dots .boost { --dot: var(--boost); }
+
+.point-detail .metric-grid {
+  margin: 10px 0;
+}
+
+.point-detail h4 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.point-detail .mini {
+  margin: 4px 0 0;
+}
+
+/* Overfitting: train vs test, each model on its own scale. */
+.gap-pair {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  padding: 16px 18px;
+}
+
+.gap-pair h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.gap-pair .ratio {
+  font: 700 26px 'Libre Baskerville', serif;
+  color: var(--forest);
+}
+
+.gap-pair.bad .ratio {
+  color: var(--rose);
+}
+
+.gap-pair .bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.gap-pair .bar-label strong {
+  font: 500 12px 'DM Mono', monospace;
+}
+
+.gap-pair .bar-track {
+  height: 10px;
+  margin: 4px 0 0;
+}
+
+.gap-pair .test .bar-fill {
+  background: var(--accent);
+}
+
+.gap-pair.bad .test .bar-fill {
+  background: var(--rose);
+}
+
+.gap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 24px 0;
+}
+
+@media (max-width: 760px) {
+  .split-grid,
+  .known,
+  .gap-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .funnel-row {
+    grid-template-columns: minmax(0, 1fr) 90px;
+  }
+
+  .funnel-row .bar-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .ladder-row {
+    grid-template-columns: 90px minmax(0, 1fr) 80px;
+  }
+}
+
+.nyc .lab-details {
+  border-top: 1px solid var(--line);
+  padding: 12px 0 0;
+  margin-top: 6px;
+}
+
+.nyc .lab-details summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}

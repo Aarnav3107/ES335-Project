@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="Beyond the Model, an interactive data-centric machine learning project for ES335 at IIT Gandhinagar." name="description"/>
+  <title>
+   An interactive data-centric ML study | Beyond the Model
+  </title>
+  <link href="css/style.css?v=20261116-home1" rel="stylesheet"/>
+  <link href="css/home.css?v=20261116-home1" rel="stylesheet"/>
+ </head>
+ <body class="home">
+  <header class="site-header">
+   <nav class="nav">
+    <a class="logo" href="index.html">
+     Beyond
+     <span class="logo-mark">
+      .
+     </span>
+     the Model
+    </a>
+    <div class="nav-links">
+     <a aria-current="page" href="index.html">
+      Home
+     </a>
+     <a href="datasets/nyc-taxi.html">
+      NYC Taxi
+     </a>
+     <a href="datasets/dataset-2.html">
+      Seoul Bikes
+     </a>
+     <a href="datasets/dataset-3.html">
+      Football xG
+     </a>
+     <a href="#summary">
+      Summary
+     </a>
+    </div>
+   </nav>
+  </header>
+  <main>
+   <section class="hero wrap">
+    <span class="eyebrow">
+     ES335 · A machine learning course project at IIT Gandhinagar
+    </span>
+    <h1>
+     What makes a prediction good, the model or the data behind it?
+    </h1>
+    <p class="lead">
+     When people talk about machine learning they usually mean the models, and the data work gets treated like a boring side job you rush through before the real fun starts. In this project we took three real tabular datasets and kept asking the same question: how much of a good prediction comes from cleaning the data and engineering better features, and how much comes from picking a stronger model?
+    </p>
+    <div class="hero-actions">
+     <a class="btn" href="datasets/nyc-taxi.html">
+      Start with the NYC Taxi case study →
+     </a>
+     <a class="btn ghost" href="#summary">
+      Read the project summary
+     </a>
+    </div>
+    <p class="answer">
+     <strong>Our short answer after three experiments:</strong> it depends on the problem, but in a way you can measure. In NYC Taxi the data was hiding the signal, in Seoul Bikes the way we evaluated decided the winner, and in Football xG knowing the game let a simple model catch up with a complex one.
+    </p>
+    <nav aria-label="On this page" class="jump">
+     <a href="#approach">Our question</a>
+     <a href="#studies">The three case studies</a>
+     <a href="#summary">Three levers</a>
+     <a href="#lens">Compare by criterion</a>
+     <a href="#thread">What ties it together</a>
+     <a href="#lessons">Lessons</a>
+     <a href="#limits">Limits</a>
+     <a href="#reproduce">Reproduce it</a>
+     <a href="#team">Team</a>
+    </nav>
+   </section>
+   <div class="wrap">
+    <div class="statrow">
+     <div class="stat">
+      <strong>
+       03
+      </strong>
+      <small>
+       Real-world datasets, each teaching a different lesson
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       3 × 3
+      </strong>
+      <small>
+       Three models compared on each of the three datasets
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       2024
+      </strong>
+      <small>
+       The year of the NeurIPS paper that inspired the project
+      </small>
+     </div>
+    </div>
+   </div>
+   <section class="section wrap" id="approach">
+    <span class="eyebrow">
+     Our question
+    </span>
+    <h2>
+     Where does predictive performance actually come from?
+    </h2>
+    <p class="lede">
+     We didn’t want to start by announcing that data preparation always wins. So in every case study we change the data representation and the model separately, watch how the held-out scores move in each case, and say clearly where the evidence supports our hypothesis and where it doesn’t.
+    </p>
+    <div class="note">
+     <strong>
+      The research behind it:
+     </strong>
+     the project is inspired by
+     <em>
+      A Data-Centric Perspective on Evaluating Machine Learning Models for Tabular Data
+     </em>
+     (NeurIPS 2024). It is our own investigation built around the paper’s idea, and not a full reproduction of it.
+     <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html" rel="noopener noreferrer" target="_blank">
+      Read the source paper ↗
+     </a>
+    </div>
+   </section>
+   <section class="section wrap" id="studies">
+    <span class="eyebrow">
+     The investigations
+    </span>
+    <h2>
+     Three datasets, and each one tells a different part of the story
+    </h2>
+    <div class="cards">
+     <a class="card" href="datasets/nyc-taxi.html">
+      <span class="number">
+       01 / NYC TAXI
+      </span>
+      <h3>
+       How messy data was hiding a good feature
+      </h3>
+      <p>
+       Using a month of New York taxi trips, we look at what happens to a simple distance feature once the impossible trips and broken coordinates are cleaned out of the data.
+      </p>
+      <span class="tag">
+       Explore NYC Taxi →
+      </span>
+     </a>
+     <a class="card" href="datasets/dataset-2.html">
+      <span class="number">
+       02 / SEOUL BIKES
+      </span>
+      <h3>
+       How the way we split the data changed the winner
+      </h3>
+      <p>
+       Using hourly bike rentals in Seoul, we tested three models on three different splits and got a result that made us question what we were actually measuring.
+      </p>
+      <span class="tag">
+       Explore Seoul Bikes →
+      </span>
+     </a>
+     <a class="card" href="datasets/dataset-3.html">
+      <span class="number">
+       03 / FOOTBALL XG
+      </span>
+      <h3>
+       How knowing the game closed the gap
+      </h3>
+      <p>
+       Using StatsBomb’s shot data, we asked whether six features that any football fan would think of can make Logistic Regression as good as XGBoost, and you can drag the players around to see for yourself.
+      </p>
+      <span class="tag">
+       Explore Football xG →
+      </span>
+     </a>
+    </div>
+   </section>
+   <section class="section wrap" id="summary">
+    <span class="eyebrow">
+     Project summary
+    </span>
+    <h2>
+     Three levers, and which one mattered in each experiment
+    </h2>
+    <p class="lede">
+     Every case study pulls on the same three levers: we can change the data or the features, we can change the model, or we can change the way we evaluate. The grid below shows how much each lever moved the result in each experiment. We only compare numbers within the same dataset, because an RMSE in minutes, an RMSE in bikes and a log loss on football shots can’t be put on one common scale.
+    </p>
+    <div aria-label="The effect of each lever in each case study" class="levers" id="levers">
+    </div>
+    <div aria-live="polite" class="lever-detail" id="lever-detail" role="status">
+    </div>
+    <p class="mini">
+     A minus sign means the error went down. The highlighted cell in each column is the lever that moved that experiment the most, and the striped cells are the ones we didn’t test.
+    </p>
+   </section>
+   <section class="section wrap" id="lens">
+    <span class="eyebrow">
+     Compare by criterion
+    </span>
+    <h2>
+     Look at all three experiments through the same lens
+    </h2>
+    <p class="lede">
+     Pick a part of the machine learning process, and see side by side how each experiment handled it. It is also a quick way to find the evidence for each part on the case-study pages.
+    </p>
+    <div aria-label="Choose a criterion" class="seg" role="group">
+     <button aria-pressed="true" class="active" data-lens="problem" type="button">Problem and scope</button>
+     <button aria-pressed="false" data-lens="data" type="button">Data</button>
+     <button aria-pressed="false" data-lens="preprocessing" type="button">Preprocessing</button>
+     <button aria-pressed="false" data-lens="baseline" type="button">Baseline and methods</button>
+     <button aria-pressed="false" data-lens="evaluation" type="button">Evaluation</button>
+     <button aria-pressed="false" data-lens="results" type="button">Results and limits</button>
+     <button aria-pressed="false" data-lens="reproducibility" type="button">Reproducibility</button>
+    </div>
+    <p aria-live="polite" class="lens-intro" id="lens-intro">
+    </p>
+    <div class="lens-cards" id="lens-cards">
+    </div>
+   </section>
+   <section class="section wrap" id="thread">
+    <span class="eyebrow">
+     What ties it together
+    </span>
+    <h2>
+     One question, answered three different ways
+    </h2>
+    <p class="homepage-quote">
+     We think the balance between better data and better models depends on the problem itself, and the three case studies are our evidence for that.
+    </p>
+    <p class="lede">
+     Each case study walks you through the question, the decisions we made about the data, the experiments we actually ran, and what those experiments can and can’t tell us. The interactive parts are there so that you can check the evidence yourself instead of just taking our word for it.
+    </p>
+    <p class="lede">
+     The NeurIPS 2024 paper that inspired this project argues that how a tabular dataset is prepared belongs in the evaluation just as much as the choice of model, and that comparisons between models can look very different once the data is handled with care. NYC Taxi and Football xG are our evidence for the first half of that: a cleaned dataset and a well-chosen feature did more for Linear Regression than anything else, and six football features closed the gap between Logistic Regression and XGBoost.
+    </p>
+    <p class="lede">
+     Seoul Bikes adds something we didn’t expect when we started. Before you can say whether better data or a better model helps more, you have to decide what “generalise” means for your problem, because the same models with the same settings swapped places when we changed the split. So the order we would now recommend is to settle the evaluation first, then look hard at the data, and only then argue about the model.
+    </p>
+   </section>
+   <section class="section wrap" id="lessons">
+    <span class="eyebrow">
+     What we would tell a classmate
+    </span>
+    <h2>
+     Five lessons we learned the hard way
+    </h2>
+    <ol class="lessons">
+     <li><strong>Check what is known at prediction time.</strong> The dropoff time, the metered distance and anything that happens after a shot all look like great features, and every one of them would be cheating.</li>
+     <li><strong>Look at the data before reaching for a stronger model.</strong> In NYC a perfectly good distance feature did nothing until we found the zero coordinates, the negative durations and the meters left running for a day.</li>
+     <li><strong>Split by the natural unit of the problem.</strong> Hours from the same day and shots from the same match share conditions, so they have to stay together, the way our Seoul day split and xG match split keep them.</li>
+     <li><strong>Write down what counts as success before you run.</strong> In xG we fixed the rule for “competitive” before the rematch, so we couldn’t move the goalposts after seeing the numbers.</li>
+     <li><strong>Don’t trust the result of a single split.</strong> Seoul showed us how much one split can change the story, and in xG we repeated everything on ten match splits before calling the result level.</li>
+    </ol>
+   </section>
+   <section class="section wrap" id="limits">
+    <span class="eyebrow">
+     Limits of the whole project
+    </span>
+    <h2>
+     What this project can’t tell you
+    </h2>
+    <ul class="limits-list">
+     <li>Each experiment covers a narrow slice of time: one month of taxi trips, one year of bike rentals and one season of football. None of them is tested on a later period or a different city or league.</li>
+     <li>Most results come from a single split and a single seed. Only Football xG repeats its split, so the NYC and Seoul numbers have no measure of how much they would vary.</li>
+     <li>NYC Taxi still uses a random split without a separate validation set, and its pickup-hour scores need a rerun after the hour_23 fix. These are the first things we plan to fix after V1.</li>
+     <li>None of the stronger models went through a proper tuning study, so a tuned XGBoost or boosting model might do better than the numbers shown here.</li>
+     <li>Our conclusions are about these three problems. We think the pattern is useful, but three datasets are not enough to turn it into a general rule.</li>
+    </ul>
+   </section>
+   <section class="section wrap" id="reproduce">
+    <span class="eyebrow">
+     Reproduce it
+    </span>
+    <h2>
+     Everything you need to follow our steps
+    </h2>
+    <ul class="repro-list">
+     <li><strong>Notebooks:</strong> the final Kaggle notebooks with their saved outputs, for <a href="notebooks/nyc-taxi.ipynb">NYC Taxi</a>, <a href="notebooks/seoul-bike-sharing.ipynb">Seoul Bikes</a> and <a href="notebooks/football-xg.ipynb">Football xG</a>, plus our <a href="research/experiments.md">experiment log</a>.</li>
+     <li><strong>Data:</strong> the datasets aren’t redistributed here. NYC Taxi and Seoul Bikes come from Kaggle (<a href="https://www.kaggle.com/datasets/elemento/nyc-yellow-taxi-trip-data" rel="noopener noreferrer" target="_blank">NYC Yellow Taxi ↗</a>, <a href="https://www.kaggle.com/datasets/waleedejaz/seoul-bike-sharing-demand" rel="noopener noreferrer" target="_blank">Seoul Bike Sharing ↗</a>), and the football shots come from <a href="https://github.com/statsbomb/open-data" rel="noopener noreferrer" target="_blank">StatsBomb Open Data ↗</a>, built into a table by a separate Kaggle notebook.</li>
+     <li><strong>The numbers on this site:</strong> every score is taken from a saved notebook output, and the Football xG and Seoul timeline data are generated by scripts in the tools folder, which check their output against the notebooks.</li>
+     <li><strong>Splits and seeds:</strong> every split uses random_state=42, and the exact split code is shown on each case-study page.</li>
+    </ul>
+   </section>
+   <section class="section wrap" id="team">
+    <span class="eyebrow">
+     Team and contributions
+    </span>
+    <h2>
+     Who did what
+    </h2>
+    <div class="team">
+     <div class="member">
+      <h3>Dhyey Buch</h3>
+      <span class="roll">Roll No. 25110106</span>
+      <ul>
+       <li>NYC Taxi case study: cleaning, feature engineering and models</li>
+       <li>Football xG case study, with help from Aarnav</li>
+       <li>Ideation and brainstorming, together with Aarnav</li>
+       <li>The project summary on this page, together with Aarnav</li>
+      </ul>
+     </div>
+     <div class="member">
+      <h3>Aarnav Shah</h3>
+      <span class="roll">Roll No. 25110288</span>
+      <ul>
+       <li>Seoul Bikes case study: the three splits and the investigation</li>
+       <li>Helped with the Football xG case study</li>
+       <li>Ideation and brainstorming, together with Dhyey</li>
+       <li>The project summary on this page, together with Dhyey</li>
+      </ul>
+     </div>
+    </div>
+    <div class="note">
+     <strong>
+      AI use:
+     </strong>
+     the website was largely generated with Claude (Opus 5.5), and Claude also helped with the Football xG experiments. Both are declared in our AI disclosure. The questions, the experiment design decisions and the conclusions are ours.
+    </div>
+   </section>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-inner">
+    <span>
+     Beyond the Model · ES335 · IIT Gandhinagar
+    </span>
+    <span>
+     <a href="notebooks/nyc-taxi.ipynb">
+      Notebook
+     </a>
+     ·
+     <a href="research/experiments.md">
+      Experiment log
+     </a>
+     ·
+     <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html">
+      Foundation paper ↗
+     </a>
+    </span>
+   </div>
+  </footer>
+  <script defer="" src="js/common.js?v=20261116-home1">
+  </script>
+  <script defer="" src="js/home.js?v=20261116-home1">
+  </script>
+ </body>
+</html>

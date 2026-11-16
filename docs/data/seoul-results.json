@@ -1,0 +1,269 @@
+{
+  "models": [
+    "Linear Regression",
+    "Decision Tree",
+    "XGBoost"
+  ],
+  "splits": {
+    "random": {
+      "title": "Random rows",
+      "question": "How well can we predict held-out hours from the same year?",
+      "method": "We split twice with shuffling: 20% of the rows for test, then 25% of the remaining 80% for validation, both with random_state=42. That leaves 60% for training, 20% for validation and 20% for test.",
+      "caveat": "Hours from the same date can land in different sets, and nearby hours share very similar conditions, so this is not a true forecast of the future.",
+      "finding": "GREAT START! XGBoost leads on validation and on test, for both error metrics. The question we should have asked straight away is what exactly the split let it see.",
+      "scores": [
+        {
+          "model": "Linear Regression",
+          "validation": {
+            "rmse": 374.4176,
+            "mae": 281.8237
+          },
+          "test": {
+            "rmse": 376.536,
+            "mae": 285.8975
+          }
+        },
+        {
+          "model": "Decision Tree",
+          "validation": {
+            "rmse": 288.5615,
+            "mae": 181.2777
+          },
+          "test": {
+            "rmse": 295.6182,
+            "mae": 183.0501
+          }
+        },
+        {
+          "model": "XGBoost",
+          "validation": {
+            "rmse": 232.9298,
+            "mae": 149.5629
+          },
+          "test": {
+            "rmse": 244.4034,
+            "mae": 155.7212
+          }
+        }
+      ],
+      "coverage": [
+        {
+          "set": "Train",
+          "rows": 5256,
+          "days": 365,
+          "seasons": {
+            "Winter": 1268,
+            "Spring": 1350,
+            "Summer": 1305,
+            "Autumn": 1333
+          },
+          "mean": 704.2450532724505,
+          "std": 647.1741345954129
+        },
+        {
+          "set": "Validation",
+          "rows": 1752,
+          "days": 364,
+          "seasons": {
+            "Winter": 443,
+            "Spring": 440,
+            "Summer": 449,
+            "Autumn": 420
+          },
+          "mean": 706.3361872146119,
+          "std": 638.1140477768444
+        },
+        {
+          "set": "Test",
+          "rows": 1752,
+          "days": 364,
+          "seasons": {
+            "Winter": 449,
+            "Spring": 418,
+            "Summer": 454,
+            "Autumn": 431
+          },
+          "mean": 703.9389269406392,
+          "std": 645.6656915949527
+        }
+      ]
+    },
+    "chronological": {
+      "title": "Chronological",
+      "question": "How well can we predict later hours using only earlier ones?",
+      "method": "The first 60% of the rows, in time order, train the models, the next 20% validate them and the last 20% test them. We checked by hand that the rows are sorted by date and then by hour.",
+      "caveat": "With only one year of data, time and season move together, so a change in the ranking cannot tell us which of the two caused it.",
+      "finding": "This was the surprise, because Linear Regression has the lowest test RMSE and MAE, while on validation the tree is best on both, so the winner depends on which part of the year we ask about.",
+      "scores": [
+        {
+          "model": "Linear Regression",
+          "validation": {
+            "rmse": 607.0256,
+            "mae": 513.4486
+          },
+          "test": {
+            "rmse": 369.8886,
+            "mae": 277.0216
+          }
+        },
+        {
+          "model": "Decision Tree",
+          "validation": {
+            "rmse": 472.4594,
+            "mae": 342.2714
+          },
+          "test": {
+            "rmse": 517.6507,
+            "mae": 348.0296
+          }
+        },
+        {
+          "model": "XGBoost",
+          "validation": {
+            "rmse": 483.4648,
+            "mae": 395.9133
+          },
+          "test": {
+            "rmse": 499.4878,
+            "mae": 377.6833
+          }
+        }
+      ],
+      "coverage": [
+        {
+          "set": "Train",
+          "rows": 5256,
+          "days": 219,
+          "seasons": {
+            "Winter": 2160,
+            "Spring": 2208,
+            "Summer": 888,
+            "Autumn": 0
+          },
+          "mean": 600.9216133942161,
+          "std": 631.7566576930018
+        },
+        {
+          "set": "Validation",
+          "rows": 1752,
+          "days": 73,
+          "seasons": {
+            "Winter": 0,
+            "Spring": 0,
+            "Summer": 1320,
+            "Autumn": 432
+          },
+          "mean": 963.2482876712329,
+          "std": 636.3270618457711
+        },
+        {
+          "set": "Test",
+          "rows": 1752,
+          "days": 73,
+          "seasons": {
+            "Winter": 0,
+            "Spring": 0,
+            "Summer": 0,
+            "Autumn": 1752
+          },
+          "mean": 756.9971461187215,
+          "std": 613.5074513892908
+        }
+      ]
+    },
+    "day": {
+      "title": "Season-stratified days",
+      "question": "How well can we predict whole days we have never seen, while still covering every season?",
+      "method": "We took every unique date with its season, split the days 60/20/20 stratified by season with random_state=42, and then put each hour into the set its date belongs to.",
+      "caveat": "Whole days stay together, but training can still contain dates that come after the test dates. So this measures performance on unseen days within the same year, not on a future year.",
+      "finding": "XGBoost leads again, with a test RMSE of 250.4534 bikes against 383.6370 for Linear Regression, which is 34.7% lower on this split.",
+      "scores": [
+        {
+          "model": "Linear Regression",
+          "validation": {
+            "rmse": 362.9971,
+            "mae": 269.6009
+          },
+          "test": {
+            "rmse": 383.637,
+            "mae": 293.1267
+          }
+        },
+        {
+          "model": "Decision Tree",
+          "validation": {
+            "rmse": 311.2711,
+            "mae": 203.6951
+          },
+          "test": {
+            "rmse": 290.6824,
+            "mae": 186.1559
+          }
+        },
+        {
+          "model": "XGBoost",
+          "validation": {
+            "rmse": 258.5067,
+            "mae": 164.8088
+          },
+          "test": {
+            "rmse": 250.4534,
+            "mae": 166.0807
+          }
+        }
+      ],
+      "coverage": [
+        {
+          "set": "Train",
+          "rows": 5256,
+          "days": 219,
+          "seasons": {
+            "Winter": 1296,
+            "Spring": 1320,
+            "Summer": 1320,
+            "Autumn": 1320
+          },
+          "mean": 699.154299847793,
+          "std": 655.844113063408
+        },
+        {
+          "set": "Validation",
+          "rows": 1752,
+          "days": 73,
+          "seasons": {
+            "Winter": 432,
+            "Spring": 432,
+            "Summer": 456,
+            "Autumn": 432
+          },
+          "mean": 718.5970319634703,
+          "std": 614.5045027014975
+        },
+        {
+          "set": "Test",
+          "rows": 1752,
+          "days": 73,
+          "seasons": {
+            "Winter": 432,
+            "Spring": 456,
+            "Summer": 432,
+            "Autumn": 432
+          },
+          "mean": 706.9503424657535,
+          "std": 642.0801141854772
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "metrics": "Random and chronological: user-supplied results, 23 October 2026. Day split: attached output screenshot; validation first, test second, per shared print code.",
+    "coverage": "Recomputed from local SeoulBikeData.csv using the shared split code; models were not rerun."
+  },
+  "dataset": {
+    "rows": 8760,
+    "days": 365,
+    "sha256": "373339b71a8935d69e9af0abf26a70744632119862eeb3919efb389a7b749c60",
+    "start": "2017-12-01",
+    "end": "2018-11-30"
+  }
+}

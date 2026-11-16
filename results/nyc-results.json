@@ -7,7 +7,7 @@
     "split": "Random train/test split, random_state=42, as implemented in uploaded notebook. Time-based split not yet run.",
     "unverified": "Notebook does not show separate validation tuning. Best-depth figures in experiment log differ from current notebook outputs.",
     "rmse_unit": "minutes",
-    "note": "Scores reconciled against the final supplied Kaggle notebook outputs. The notebook files in notebooks/ are preserved unchanged.",
+    "note": "Scores reconciled against the final supplied Kaggle notebook outputs. Notebook source is unchanged except the cell 51 hour_23 fix; pickup-hour scores predate that fix.",
     "source_notebook": "notebooks/nyc-taxi-final.ipynb"
   },
   "cleaning": {
@@ -88,7 +88,7 @@
       "rmse": 6.2453,
       "mae": 4.1858,
       "source": "Notebook cell 51",
-      "flag": "The hour-feature list excludes hour_23; verify and rerun."
+      "flag": "This score was recorded before we fixed the hour_23 bug, so it still needs a rerun."
     },
     {
       "features": "hour",
@@ -97,7 +97,7 @@
       "mae": 3.7339,
       "source": "Notebook cell 52",
       "depth": 14,
-      "flag": "Experiment log reports a different tuned tree score (5.4765 RMSE). Verify before publication."
+      "flag": "Our experiment log has a better tuned tree (5.4765 RMSE) that isn't in the notebook yet, so this uses the notebook's number."
     },
     {
       "features": "hour",
@@ -105,7 +105,7 @@
       "rmse": 4.8957,
       "mae": 3.1181,
       "source": "Notebook cell 53",
-      "flag": "Hour-feature list excludes hour_23."
+      "flag": "This score was recorded before we fixed the hour_23 bug, so it still needs a rerun."
     }
   ],
   "early": {
@@ -122,6 +122,115 @@
       "trainMAE": 0.1155,
       "testRMSE": 138.5187,
       "testMAE": 9.4284
+    }
+  },
+  "evidence": {
+    "duration": {
+      "min": -43.95,
+      "max": 119912.7,
+      "nonPositive": 11429,
+      "median": 10.4667,
+      "p99": 53.9,
+      "p999": 1424.05,
+      "source": "Notebook cells 8 and 11"
+    },
+    "nearDay": {
+      "count": 17544,
+      "p10": 626.49,
+      "p25": 1407.4625,
+      "p50": 1430.175,
+      "p75": 1436.3167,
+      "p90": 1438.2833,
+      "max": 1439.9667,
+      "source": "Notebook cell 36: trips between 2 and 24 hours"
+    },
+    "speed": {
+      "p99": 35.79,
+      "p999": 52.04,
+      "p9995": 405.0,
+      "p9999": 4860.0,
+      "max": 388589700,
+      "above100": 8586,
+      "source": "Notebook cells 16 and 17"
+    },
+    "zeroCoords": {
+      "pickup": 157879,
+      "dropoff": 140281,
+      "haversineP999": 5384.858,
+      "haversineMax": 5580.006,
+      "source": "Notebook cells 31 and 34"
+    },
+    "durationAbove": {
+      "thresholds": [
+        [
+          60,
+          73866
+        ],
+        [
+          120,
+          17561
+        ],
+        [
+          180,
+          16722
+        ],
+        [
+          240,
+          16520
+        ],
+        [
+          360,
+          16287
+        ],
+        [
+          720,
+          15668
+        ],
+        [
+          1440,
+          17
+        ]
+      ],
+      "chosen": 120,
+      "source": "Notebook cell 33, counted partway through cleaning"
+    },
+    "distanceAbove": {
+      "thresholds": [
+        [
+          20,
+          57052
+        ],
+        [
+          30,
+          3654
+        ],
+        [
+          50,
+          391
+        ],
+        [
+          75,
+          70
+        ],
+        [
+          100,
+          29
+        ],
+        [
+          200,
+          3
+        ]
+      ],
+      "chosen": 50,
+      "max": 485.9,
+      "source": "Notebook cell 19, counted partway through cleaning"
+    },
+    "overfit": {
+      "boostTrain": 4.6653,
+      "boostTest": 4.8957,
+      "treeTrain": 4.8801,
+      "treeTest": 138.5187,
+      "source": "Notebook cells 26, 53 and 55"
     }
   }
 }

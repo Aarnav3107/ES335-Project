@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="Three models, three ways of splitting the data, and a result that changed the question. A first-person Seoul Bike Sharing investigation for ES335." name="description"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Seoul Bikes · How the split changed the winner | Beyond the Model
+  </title>
+  <link href="../css/style.css?v=20261116-home1" rel="stylesheet"/>
+  <link href="../css/seoul.css?v=20261116-home1" rel="stylesheet"/>
+  <script defer="" src="../js/seoul-data.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/seoul.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/seoul-days.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/seoul-year.js?v=20261116-home1">
+  </script>
+  <script defer="" src="../js/common.js?v=20261116-home1">
+  </script>
+ </head>
+ <body class="seoul">
+  <a class="skip" href="#main">
+   Skip to case study
+  </a>
+  <header class="site-header">
+   <nav class="nav">
+    <a class="logo" href="../index.html">
+     Beyond
+     <span class="logo-mark">
+      .
+     </span>
+     the Model
+    </a>
+    <div class="nav-links">
+     <a href="../index.html">
+      Home
+     </a>
+     <a href="../datasets/nyc-taxi.html">
+      NYC Taxi
+     </a>
+     <a aria-current="page" href="../datasets/dataset-2.html">
+      Seoul Bikes
+     </a>
+     <a href="../datasets/dataset-3.html">
+      Football xG
+     </a>
+     <a href="../index.html#summary">
+      Summary
+     </a>
+    </div>
+   </nav>
+  </header>
+  <main id="main">
+   <section class="wrap hero" style="padding-bottom: 40px">
+    <span class="eyebrow">
+     Case study 02 / Seoul Bike Sharing / Regression
+    </span>
+    <h1>
+     The same three models told a different story every time we changed the split
+    </h1>
+    <p class="lead">
+     Can the weather, the hour and the season tell us how many bikes people in Seoul will rent? After NYC Taxi we wanted to look at the other side of the question, so here we compared three models with only basic preparation and paid close attention to what the results were really saying.
+    </p>
+    <div class="hero-actions">
+     <a class="btn" href="#problem">
+      Start exploring ↓
+     </a>
+     <a class="btn ghost" href="../notebooks/seoul-source.md">
+      Read the original source
+     </a>
+    </div>
+   </section>
+   <div class="wrap">
+    <div class="statrow">
+     <div class="stat">
+      <strong>
+       8,760
+      </strong>
+      <small>
+       Hourly records from December 2017 to November 2018
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       365
+      </strong>
+      <small>
+       Days in the one year of data we have
+      </small>
+     </div>
+     <div class="stat">
+      <strong>
+       3 × 3
+      </strong>
+      <small>
+       Three models, each tested on three different splits
+      </small>
+     </div>
+    </div>
+    <div class="report-layout">
+     <aside aria-label="Page chapters" class="toc">
+      <span>
+       On this page
+      </span>
+      <a href="#problem">
+       01 / The problem
+      </a>
+      <a href="#models">
+       02 / The results
+      </a>
+      <a href="#investigation">
+       03 / The investigation
+      </a>
+      <a href="#preparation">
+       04 / How we set it up
+      </a>
+      <a href="#findings">
+       05 / Findings
+      </a>
+      <a href="#code">
+       Code &amp; sources
+      </a>
+     </aside>
+     <div>
+      <section class="chapter" id="problem">
+       <span class="chapter-number">
+        CHAPTER 01
+       </span>
+       <h2>
+        What we are trying to predict
+       </h2>
+       <p>
+        In NYC Taxi, cleaning the data and engineering features did most of the work. Here we wanted to see the opposite case: can a more flexible model make a big difference without a mountain of feature engineering behind it?
+       </p>
+       <p>
+        The target is the
+        <strong>
+         Rented Bike Count
+        </strong>
+        for each hour. The inputs are the weather, the hour, the season, whether it was a holiday and whether the service was running that day. We compared Linear Regression, a Decision Tree and XGBoost, and gave all three exactly the same basic features.
+       </p>
+       <p>
+        We’ll show you the results first, and then explain why they made us question the way we were evaluating the models in the first place.
+       </p>
+      </section>
+      <section class="chapter" id="models">
+       <span class="chapter-number">
+        CHAPTER 02
+       </span>
+       <h2>
+        First, let’s look at what happened
+       </h2>
+       <p>
+        When we split the rows randomly, XGBoost’s test RMSE was 244.4034 bikes against 376.5360 for Linear Regression. When we split the data chronologically, Linear Regression came out on top instead, with 369.8886 against 499.4878 for XGBoost. And with a split that keeps whole days together and covers every season, XGBoost led again at 250.4534. The model settings were identical every single time, and yet the winner changed with the evaluation.
+       </p>
+       <div aria-label="Which model wins the test set on each split" class="winner-strip" id="winner-strip">
+       </div>
+       <p>
+        Use the split buttons below to see each model’s error next to the seasons that each set contains. We explain what is going on right after.
+       </p>
+       <div class="lab split-lab" id="model-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           How each split changes both the errors and the seasons the models get to see
+          </h3>
+         </div>
+        </div>
+        <div aria-label="Evaluation split" class="seg split-buttons" role="group">
+         <button aria-pressed="true" class="active" data-split="random" type="button">
+          Random rows
+         </button>
+         <button aria-pressed="false" data-split="chronological" type="button">
+          Chronological
+         </button>
+         <button aria-pressed="false" data-split="day" type="button">
+          Season-stratified days
+         </button>
+        </div>
+        <div class="lab-controls">
+         <p class="split-context" id="active-split">
+          Random rows · Test RMSE
+         </p>
+         <div class="selects">
+          <label>
+           Evaluate on
+           <select id="evaluation">
+            <option value="test">
+             Test
+            </option>
+            <option value="validation">
+             Validation
+            </option>
+           </select>
+          </label>
+          <label>
+           Error metric
+           <select id="metric">
+            <option value="rmse">
+             RMSE
+            </option>
+            <option value="mae">
+             MAE
+            </option>
+           </select>
+          </label>
+         </div>
+        </div>
+        <div aria-label="Linked model metrics and season coverage" class="comparison-grid">
+         <div class="comparison-panel leaderboard">
+          <h4>
+           Model error
+           <span>
+            lower is better
+           </span>
+          </h4>
+          <div aria-label="Model error comparison" id="bars">
+          </div>
+          <p class="mini">
+           Bikes per hour, drawn on the same bar scale for every split.
+          </p>
+         </div>
+         <div class="comparison-panel coverage-panel">
+          <h4>
+           Season coverage
+           <span>
+            all three sets
+           </span>
+          </h4>
+          <div class="legend">
+           <span class="winter">
+            Winter
+           </span>
+           <span class="spring">
+            Spring
+           </span>
+           <span class="summer">
+            Summer
+           </span>
+           <span class="autumn">
+            Autumn
+           </span>
+          </div>
+          <div id="coverage">
+          </div>
+          <p class="mini">
+           These are row counts, and the outlined set is the one chosen in “Evaluate on”.
+          </p>
+         </div>
+        </div>
+        <p aria-live="polite" class="comparison-summary" id="comparison-summary" role="status">
+         XGBoost has 35.1% lower test RMSE than Linear Regression. Every season is represented, but hours from the same day end up in different sets, so this compares hours within the same year rather than forecasting the future.
+        </p>
+        <details class="lab-details">
+         <summary>
+          How each split works and how to read it
+         </summary>
+         <h4 id="split-question">
+         </h4>
+         <p id="split-method">
+         </p>
+         <p id="split-caveat">
+         </p>
+         <p id="split-finding">
+         </p>
+        </details>
+        <details class="lab-details">
+         <summary>
+          All the reported scores and target distributions
+         </summary>
+         <div class="table-scroll">
+          <table>
+           <caption id="scores-caption">
+            All reported scores for this split
+           </caption>
+           <thead>
+            <tr>
+             <th scope="col">
+              Model
+             </th>
+             <th scope="col">
+              Val RMSE
+             </th>
+             <th scope="col">
+              Val MAE
+             </th>
+             <th scope="col">
+              Test RMSE
+             </th>
+             <th scope="col">
+              Test MAE
+             </th>
+            </tr>
+           </thead>
+           <tbody id="scores">
+           </tbody>
+          </table>
+         </div>
+         <div class="table-scroll">
+          <table>
+           <caption>
+            Recomputed target distribution, in rented bikes per hour
+           </caption>
+           <thead>
+            <tr>
+             <th scope="col">
+              Set
+             </th>
+             <th scope="col">
+              Rows
+             </th>
+             <th scope="col">
+              Distinct days
+             </th>
+             <th scope="col">
+              Mean
+             </th>
+             <th scope="col">
+              Std. dev.
+             </th>
+            </tr>
+           </thead>
+           <tbody id="distribution">
+           </tbody>
+          </table>
+         </div>
+         <p class="mini">
+          The season coverage and target summaries are recomputed from the local CSV using the same split code. With random rows the same day can appear in several sets, so the day counts overlap, while the day split has no overlap at all. RMSE gives large errors more weight, and MAE is simply the average size of the error.
+         </p>
+        </details>
+        <p class="source-line">
+         The metrics come from the runs we recorded and from a
+         <a href="../data/seoul-day-results.png">
+          screenshot of the day-split output
+         </a>
+         .
+         <a download="" href="../data/seoul-metrics.csv">
+          Download all scores ↓
+         </a>
+         ·
+         <a href="../data/seoul-results.json">
+          Data and provenance ↗
+         </a>
+        </p>
+        <noscript>
+         <h3>
+          Random rows
+         </h3>
+         <div class="table-scroll">
+          <table>
+           <thead>
+            <tr>
+             <th>
+              Model
+             </th>
+             <th>
+              Val RMSE
+             </th>
+             <th>
+              Val MAE
+             </th>
+             <th>
+              Test RMSE
+             </th>
+             <th>
+              Test MAE
+             </th>
+            </tr>
+           </thead>
+           <tbody>
+            <tr>
+             <th scope="row">
+              Linear Regression
+             </th>
+             <td>
+              374.4176
+             </td>
+             <td>
+              281.8237
+             </td>
+             <td>
+              376.5360
+             </td>
+             <td>
+              285.8975
+             </td>
+            </tr>
+            <tr>
+             <th scope="row">
+              Decision Tree
+             </th>
+             <td>
+              288.5615
+             </td>
+             <td>
+              181.2777
+             </td>
+             <td>
+              295.6182
+             </td>
+             <td>
+              183.0501
+             </td>
+            </tr>
+            <tr>
+             <th scope="row">
+              XGBoost
+             </th>
+             <td>
+              232.9298
+             </td>
+             <td>
+              149.5629
+             </td>
+             <td>
+              244.4034
+             </td>
+             <td>
+              155.7212
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </div>
+         <h3>
+          Chronological
+         </h3>
+         <div class="table-scroll">
+          <table>
+           <thead>
+            <tr>
+             <th>
+              Model
+             </th>
+             <th>
+              Val RMSE
+             </th>
+             <th>
+              Val MAE
+             </th>
+             <th>
+              Test RMSE
+             </th>
+             <th>
+              Test MAE
+             </th>
+            </tr>
+           </thead>
+           <tbody>
+            <tr>
+             <th scope="row">
+              Linear Regression
+             </th>
+             <td>
+              607.0256
+             </td>
+             <td>
+              513.4486
+             </td>
+             <td>
+              369.8886
+             </td>
+             <td>
+              277.0216
+             </td>
+            </tr>
+            <tr>
+             <th scope="row">
+              Decision Tree
+             </th>
+             <td>
+              472.4594
+             </td>
+             <td>
+              342.2714
+             </td>
+             <td>
+              517.6507
+             </td>
+             <td>
+              348.0296
+             </td>
+            </tr>
+            <tr>
+             <th scope="row">
+              XGBoost
+             </th>
+             <td>
+              483.4648
+             </td>
+             <td>
+              395.9133
+             </td>
+             <td>
+              499.4878
+             </td>
+             <td>
+              377.6833
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </div>
+         <h3>
+          Season-stratified days
+         </h3>
+         <div class="table-scroll">
+          <table>
+           <thead>
+            <tr>
+             <th>
+              Model
+             </th>
+             <th>
+              Val RMSE
+             </th>
+             <th>
+              Val MAE
+             </th>
+             <th>
+              Test RMSE
+             </th>
+             <th>
+              Test MAE
+             </th>
+            </tr>
+           </thead>
+           <tbody>
+            <tr>
+             <th scope="row">
+              Linear Regression
+             </th>
+             <td>
+              362.9971
+             </td>
+             <td>
+              269.6009
+             </td>
+             <td>
+              383.6370
+             </td>
+             <td>
+              293.1267
+             </td>
+            </tr>
+            <tr>
+             <th scope="row">
+              Decision Tree
+             </th>
+             <td>
+              311.2711
+             </td>
+             <td>
+              203.6951
+             </td>
+             <td>
+              290.6824
+             </td>
+             <td>
+              186.1559
+             </td>
+            </tr>
+            <tr>
+             <th scope="row">
+              XGBoost
+             </th>
+             <td>
+              258.5067
+             </td>
+             <td>
+              164.8088
+             </td>
+             <td>
+              250.4534
+             </td>
+             <td>
+              166.0807
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </div>
+        </noscript>
+       </div>
+      </section>
+      <section class="chapter" id="investigation">
+       <span class="chapter-number">
+        CHAPTER 03
+       </span>
+       <h2>
+        So why did the story change?
+       </h2>
+       <h3 class="step">
+        Our first reaction was that this result didn’t sit right with us
+       </h3>
+       <p>
+        When Linear Regression beat both tree models on the chronological test set, our first reaction in the notebook was that this result just doesn’t sit right with us, because it went against everything the random split had shown and against what we expected from theory. It completely caught us off guard. But a result you didn’t expect is a reason to investigate your setup, not a reason to throw the score away, and it was exciting to have something real to dig into.
+       </p>
+       <h3 class="step">
+        Were the splits seeing different seasons?
+       </h3>
+       <p>
+        Our first guess was that the chronological split was training “almost exclusively in winter months”. That guess turned out to be too strong. When we recomputed the coverage, training had
+        <strong>
+         2,160 winter, 2,208 spring and 888 summer rows, and not a single autumn row
+        </strong>
+        . Validation was a mix of summer and autumn, and the test set was entirely autumn.
+       </p>
+       <p>
+        The
+        <code>
+         target.describe()
+        </code>
+        check in the notebook had already shown the mean and the spread of rentals changing from one set to the next, and the explorer above makes those differences easy to see. All of this supports the idea of a distribution shift, but it doesn’t prove that the season alone caused the ranking to flip.
+       </p>
+       <div class="lab" id="year-lab">
+        <div class="lab-head">
+         <div>
+          <h3>
+           A year of bike rentals, and which days each split hands to the models
+          </h3>
+          <p>
+           This is the picture that made the whole story click for us. Start with the seasons, then switch to each split and watch which days end up in training, validation and test.
+          </p>
+         </div>
+        </div>
+        <div aria-label="What to colour the days by" class="seg" role="group">
+         <button aria-pressed="true" class="active" data-year="seasons" type="button">
+          Seasons
+         </button>
+         <button aria-pressed="false" data-year="random" type="button">
+          Random rows
+         </button>
+         <button aria-pressed="false" data-year="chronological" type="button">
+          Chronological
+         </button>
+         <button aria-pressed="false" data-year="day" type="button">
+          Season-stratified days
+         </button>
+        </div>
+        <div class="year-key" id="year-key">
+        </div>
+        <div id="year-chart">
+        </div>
+        <p aria-live="polite" class="year-readout" id="year-readout">
+        </p>
+        <p aria-live="polite" class="year-summary" id="year-summary" role="status">
+        </p>
+        <p class="source-line">
+         Daily totals and split assignments are recomputed from the local CSV with the notebook’s own split code and random_state=42, and they reproduce the season coverage reported above exactly. In the split views, each bar is shaded by how many of that day’s 24 hours went to each set.
+        </p>
+       </div>
+       <h3 class="step">
+        We pushed back on the split, and then asked a sharper question
+       </h3>
+       <p>
+        Our argument was that for bike rentals, the weather and the season matter much more than whether it is 2017 or 2019. That is a hypothesis, though, and these runs don’t prove it. If the real task is predicting later periods from earlier data, then the chronological evaluation is still the relevant one.
+       </p>
+       <p>
+        So we asked a second question instead: how well do the models do on
+        <strong>
+         whole days they have never seen, with every season represented
+        </strong>
+        ? We split the unique days 60/20/20, stratified by season, and then put all the hours of each day into the set that day belongs to.
+       </p>
+       <h3 class="step">
+        A stronger result, but with a narrower claim
+       </h3>
+       <p>
+        On the season-stratified day split, XGBoost leads on validation and on test, for both RMSE and MAE. Keeping each day together removes the problem of hours from the same day ending up in different sets. It doesn’t remove every link between nearby days, though, and it doesn’t simulate using the model in a future year.
+       </p>
+       <div class="note">
+        <strong>
+         What we want you to take from this chapter:
+        </strong>
+        the split decides what “generalise” actually means. These three splits answer related questions, but they are different exams, and you can’t swap one for another and expect the same answer.
+       </div>
+      </section>
+      <section class="chapter" id="preparation">
+       <span class="chapter-number">
+        CHAPTER 04
+       </span>
+       <h2>
+        How we set up the comparison
+       </h2>
+       <p>
+        We dropped rows with a missing target, removed the Date column from the inputs, and one-hot encoded Hour, Seasons, Holiday and Functioning Day. That was the whole preparation for every comparison on this page. The local CSV turned out not to have any missing targets anyway.
+       </p>
+       <div class="code-block">
+        <div class="code-top">
+         <span>
+          The initial preparation · original notebook
+         </span>
+         <button aria-label="Copy preparation code" class="copy" data-copy="" type="button">
+          Copy
+         </button>
+        </div>
+        <pre class="code"><code>df.dropna(axis=0, subset=['Rented Bike Count'], inplace=True)
+df.drop(['Date'], axis=1, inplace=True)
+X = pd.get_dummies(X, columns=['Hour', 'Seasons', 'Holiday', 'Functioning Day'], drop_first=True, dtype=int)</code></pre>
+       </div>
+       <h3>
+        Baseline
+       </h3>
+       <p>
+        Linear Regression on these basic features is our baseline. It is the simplest of the three models and gets exactly the same inputs as the other two, so on every split the Decision Tree and XGBoost are measured against it, and every comparison in the results chapter is a comparison with this model.
+       </p>
+       <div class="baseline-grid">
+        <div class="metric">
+         <small>
+          Random rows
+         </small>
+         <strong>
+          376.5360
+         </strong>
+         <em>
+          test RMSE in bikes · MAE 285.8975
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          Chronological
+         </small>
+         <strong>
+          369.8886
+         </strong>
+         <em>
+          test RMSE in bikes · MAE 277.0216
+         </em>
+        </div>
+        <div class="metric">
+         <small>
+          Season-stratified days
+         </small>
+         <strong>
+          383.6370
+         </strong>
+         <em>
+          test RMSE in bikes · MAE 293.1267
+         </em>
+        </div>
+       </div>
+       <div class="note">
+        <strong>
+         How the splits work:
+        </strong>
+        every split gives 60% of the rows to training, 20% to validation and 20% to test. What changes is which rows end up together. Random rows mixes the hours up, the chronological split holds out the later part of the year, and the season-stratified day split keeps each date whole while still covering every season.
+       </div>
+       <div aria-label="The three splits compared" class="exams" id="exams">
+       </div>
+       <p>
+        We didn’t run a preprocessing ablation in this case study. This chapter compares the same model settings across different evaluation designs, so it doesn’t measure a separate effect of cleaning the data.
+       </p>
+      </section>
+      <section class="chapter" id="findings">
+       <span class="chapter-number">
+        CHAPTER 05
+       </span>
+       <h2>
+        What we’re taking away from this
+       </h2>
+       <div class="takeaways">
+        <div class="takeaway">
+         <h3>
+          The choice of model really mattered here
+         </h3>
+         <p>
+          With random rows and with season-stratified days, XGBoost has the lowest errors, while on the chronological test set Linear Regression wins. So whenever someone tells you which model is best, the first thing you should ask is which evaluation they used.
+         </p>
+        </div>
+        <div class="takeaway">
+         <h3>
+          The evaluation is part of the experiment
+         </h3>
+         <p>
+          We started out comparing models and ended up questioning what the comparison even meant. Looking at what each set actually contained turned out to be just as important as reading the RMSE.
+         </p>
+        </div>
+        <div class="takeaway">
+         <h3>
+          This is one piece of evidence and not a general rule
+         </h3>
+         <p>
+          These runs don’t prove that complex models always fail when the distribution shifts, that random splits are better, or that preprocessing matters less. We also didn’t run a controlled preprocessing ablation here, so this page can’t say anything about the effect of cleaning.
+         </p>
+        </div>
+       </div>
+       <details class="limitations" open="">
+        <summary>
+         Where this version stops, and what is still unresolved
+        </summary>
+        <ul>
+         <li>
+          There is only one year of data and one seed per split, so there are no confidence intervals from repeated splits and no test on a future year.
+         </li>
+         <li>
+          The season shift is real in the recomputed coverage, but we haven’t isolated how much of the error it causes. Models extrapolating to unseen seasons is a possible explanation, not a proven one.
+         </li>
+         <li>
+          The new split reloads the CSV and doesn’t repeat the missing-target drop. The local CSV has no missing targets, but new data should go through exactly the same preprocessing.
+         </li>
+         <li>
+          The one-hot encoding is done before splitting in the shared code. A proper pipeline would fit the preprocessing on the training data only and handle unseen categories explicitly.
+         </li>
+         <li>
+          The weather inputs would have to be available at the time of prediction. These experiments use the recorded weather, so they don’t tell us how the models would do with weather forecasts.
+         </li>
+         <li>
+          The chronological result is what made us try the next experiment. For a real deployment claim we would need to fix the protocol in advance and test on a fresh holdout that we haven’t looked at.
+         </li>
+        </ul>
+        <p>
+         <strong>
+          What we would try next:
+         </strong>
+         repeated day splits and rolling, season-aware evaluation would show how stable these results are across different held-out dates. Those are future experiments, and we are not claiming any results from them here.
+        </p>
+       </details>
+       <p>
+        We came in wanting to compare models, and
+        <em>
+         we’re leaving with a much better question about how to evaluate them.
+        </em>
+       </p>
+       <div class="hero-actions">
+        <a class="btn ghost" href="nyc-taxi.html">
+         ← Back to NYC Taxi
+        </a>
+        <a class="btn" href="dataset-3.html">
+         Continue to Football xG →
+        </a>
+       </div>
+      </section>
+      <section class="chapter" id="code">
+       <span class="chapter-number">
+        CHAPTER 06
+       </span>
+       <h2>
+        Code and sources
+       </h2>
+       <div id="code-excerpts">
+       </div>
+       <div class="note">
+        <h3>
+         What stayed the same in every run
+        </h3>
+        <p>
+         <strong>
+          Linear Regression:
+         </strong>
+         the default estimator.
+         <strong>
+          Decision Tree:
+         </strong>
+         max_depth=18, min_samples_leaf=10, random_state=42.
+         <strong>
+          XGBoost:
+         </strong>
+         up to 2,000 estimators, learning_rate=0.1, early_stopping_rounds=50, n_jobs=4 and seed=42, with the validation set passed in through eval_set.
+        </p>
+        <p>
+         Early stopping can pick a different number of boosting rounds on each split, so these are comparisons of the settings we reported and not a full tuning study.
+        </p>
+       </div>
+       <div class="hero-actions">
+        <a class="btn" href="../notebooks/seoul-source.md">
+         Read the full shared code and our reflections ↗
+        </a>
+        <a class="btn ghost" download="" href="../notebooks/seoul-bike-sharing.ipynb">
+         Download the final notebook ↓
+        </a>
+       </div>
+       <p class="source-line">
+        This is the final Kaggle notebook with its saved outputs. It uses Kaggle input paths, so you’ll need to attach the dataset to rerun it. The
+        <a href="../notebooks/seoul-early-draft.ipynb">
+         earlier local notebook
+        </a>
+        is kept separately for transparency, and its old 75/25 experiment isn’t used anywhere on this page.
+       </p>
+      </section>
+     </div>
+    </div>
+   </div>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-inner">
+    <span>
+     Beyond the Model · ES335 · IIT Gandhinagar
+    </span>
+    <span>
+     Dataset 2 · Seoul Bike Sharing ·
+     <a href="../README-SEOUL.md">
+      Editing and integration guide
+     </a>
+    </span>
+   </div>
+  </footer>
+ </body>
+</html>
