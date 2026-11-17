@@ -51,6 +51,8 @@ Ideation and brainstorming, and the project summary on the website's home page, 
 
 ## Reproduce the notebooks
 
+The final notebooks are also published on Kaggle, where they can be read with all their outputs: [NYC Taxi](https://www.kaggle.com/code/dhyeybuch/es335-project-nyc-taxi), [Seoul Bikes](https://www.kaggle.com/code/dhyeybuch/es335-project-seoul-bikesharing) and [Football xG](https://www.kaggle.com/code/dhyeybuch/es335-project-football-xg).
+
 The simplest reproducible route is Kaggle, which supplies the original `/kaggle/input/` paths used in the notebooks. Create a Kaggle notebook from each file in `notebooks/`, attach the dataset named in `data/README.md`, select Python 3, and run the cells in order. The saved outputs are included so readers can compare their run with the submitted results.
 
 For local execution, use Python 3.13 to match the saved notebook kernel, install `requirements.txt`, download each source dataset, and update the notebook’s data-loading path to your downloaded file. No model or feature-engineering code has been rewritten for local execution. Kaggle package versions can change; `requirements.txt` lists the direct libraries used, not a frozen Kaggle image.
