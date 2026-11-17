@@ -267,7 +267,89 @@
   margin: 5px 0;
 }
 
+/* Showcase: a still of the take-the-shot demo, linking straight to it. */
+.showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  margin: 8px 0 0;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.showcase:hover {
+  border-color: var(--forest);
+  transform: translateY(-2px);
+}
+
+.showcase h3 {
+  font: 700 22px/1.35 'Libre Baskerville', serif;
+  margin: 0 0 10px;
+}
+
+.showcase p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+.showcase-xg {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.showcase-xg > div {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fcfcf9;
+  padding: 8px 14px;
+}
+
+.showcase-xg small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.showcase-xg strong {
+  font: 700 22px 'Libre Baskerville', serif;
+}
+
+.showcase-xg strong.eng {
+  color: var(--forest);
+}
+
+.showcase-pitch {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #e9f0e6;
+  border-radius: 6px;
+}
+
+.sp-line { fill: none; stroke: #b7c8b9; stroke-width: 0.35; }
+.sp-spot { fill: #b7c8b9; }
+.sp-goal { fill: var(--ink); }
+.sp-cone { fill: rgba(33, 102, 87, 0.14); stroke: rgba(33, 102, 87, 0.55); stroke-width: 0.25; stroke-dasharray: 0.8 0.6; }
+.sp-near { stroke: #a95e4f; stroke-width: 0.3; stroke-dasharray: 0.6 0.5; }
+.sp-def { fill: #a95e4f; stroke: white; stroke-width: 0.45; }
+.sp-def.sp-in { stroke: var(--ink); stroke-width: 0.7; }
+.sp-gk { fill: var(--ink); stroke: white; stroke-width: 0.45; }
+.sp-shooter { fill: #c78343; stroke: white; stroke-width: 0.45; }
+
 @media (max-width: 860px) {
+  .showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .levers {
     grid-template-columns: minmax(0, 1fr);
   }
