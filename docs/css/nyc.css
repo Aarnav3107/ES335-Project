@@ -461,3 +461,7 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+.ladder-row.muted-row .bar-fill {
+  background: #b7c4b9;
+}

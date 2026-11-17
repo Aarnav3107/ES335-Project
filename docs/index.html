@@ -7,8 +7,8 @@
   <title>
    An interactive data-centric ML study | Beyond the Model
   </title>
-  <link href="css/style.css?v=20261117-tidy2" rel="stylesheet"/>
-  <link href="css/home.css?v=20261117-tidy2" rel="stylesheet"/>
+  <link href="css/style.css?v=20261117-eval1" rel="stylesheet"/>
+  <link href="css/home.css?v=20261117-eval1" rel="stylesheet"/>
  </head>
  <body class="home">
   <header class="site-header">
@@ -244,7 +244,7 @@
     <ul class="limits-list">
      <li>Each experiment covers a narrow slice of time: one month of taxi trips, one year of bike rentals and one season of football. None of them is tested on a later period or a different city or league.</li>
      <li>Most results come from a single split and a single seed. Only Football xG repeats its split, so the NYC and Seoul numbers have no measure of how much they would vary.</li>
-     <li>NYC Taxi still uses a random split without a separate validation set, and its pickup-hour scores need a rerun after the hour_23 fix. These are the first things we plan to fix after V1.</li>
+     <li>NYC Taxi uses random splits rather than the time-based split we originally planned, and its boosting model was still improving when it hit the 2,000-round cap. A time-based split is the first thing we would add next.</li>
      <li>None of the stronger models went through a proper tuning study, so a tuned XGBoost or boosting model might do better than the numbers shown here.</li>
      <li>Our conclusions are about these three problems. We think the pattern is useful, but three datasets are not enough to turn it into a general rule.</li>
     </ul>
@@ -314,9 +314,9 @@
     </span>
    </div>
   </footer>
-  <script defer="" src="js/common.js?v=20261117-tidy2">
+  <script defer="" src="js/common.js?v=20261117-eval1">
   </script>
-  <script defer="" src="js/home.js?v=20261117-tidy2">
+  <script defer="" src="js/home.js?v=20261117-eval1">
   </script>
  </body>
 </html>

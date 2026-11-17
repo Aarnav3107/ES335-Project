@@ -7,8 +7,8 @@
   <title>
    NYC Taxi · How messy data hid a good feature | Beyond the Model
   </title>
-  <link href="../css/style.css?v=20261117-tidy2" rel="stylesheet"/>
-  <link href="../css/nyc.css?v=20261117-tidy2" rel="stylesheet"/>
+  <link href="../css/style.css?v=20261117-eval1" rel="stylesheet"/>
+  <link href="../css/nyc.css?v=20261117-eval1" rel="stylesheet"/>
  </head>
  <body class="nyc">
   <header class="site-header">
@@ -156,7 +156,7 @@ jan16_data['total_duration'] = (jan16_data['dropoff'] - jan16_data['pickup']).dt
         <strong>
          How the experiments were set up:
         </strong>
-        every model was trained on the same reproducible sample of 500,000 trips with a random 75/25 train/test split. We had originally planned a time-based split as well, and since that experiment hasn’t been run yet, nothing on this page should be read as a forecast for future months.
+        every model was trained on the same reproducible sample of 500,000 trips. The feature stages use a random 75/25 train/test split, and at the end we repeat the final comparison with a 60/20/20 split, where the tree depth and the number of boosting rounds are picked on the validation set and the test set is only used once. We had originally planned a time-based split as well, and since that experiment hasn’t been run, nothing on this page should be read as a forecast for future months.
        </div>
       </section>
       <section class="chapter" id="cleaning">
@@ -509,23 +509,23 @@ cleaned_data["haversine_distance"] = haversine_distance(
 cleaned_data = pd.get_dummies(cleaned_data, columns=['hour'], prefix='hour', drop_first=True, dtype=int)
 cleaned_data.columns</code></pre>
        </div>
-       <div class="warning">
+       <div class="note">
         <strong>
-         A bug we found later:
+         A bug we found and fixed:
         </strong>
-        the run recorded here built the hour feature list with
+        our first run built the hour feature list with
         <code>
          range(1, 23)
         </code>
-        , which leaves out
+        , which quietly left out
         <code>
          hour_23
         </code>
-        . The notebook code now uses
+        . The notebook now uses
         <code>
          range(1, 24)
         </code>
-        , but the pickup-hour scores on this page still come from the run before that fix, and we still need to rerun it.
+        , and every pickup-hour score on this page comes from the rerun with the fix.
        </div>
       </section>
       <section class="chapter" id="models">
@@ -675,10 +675,10 @@ cleaned_data.columns</code></pre>
              Linear Regression
             </td>
             <td>
-             6.2453
+             6.2454
             </td>
             <td>
-             4.1858
+             4.1859
             </td>
            </tr>
            <tr>
@@ -689,10 +689,10 @@ cleaned_data.columns</code></pre>
              Decision Tree
             </td>
             <td>
-             5.8409
+             5.8489
             </td>
             <td>
-             3.7339
+             3.7341
             </td>
            </tr>
            <tr>
@@ -703,10 +703,10 @@ cleaned_data.columns</code></pre>
              Histogram Boosting
             </td>
             <td>
-             4.8957
+             4.9329
             </td>
             <td>
-             3.1181
+             3.1527
             </td>
            </tr>
           </tbody>
@@ -721,7 +721,7 @@ cleaned_data.columns</code></pre>
         Early on, before the final cleaning, we trained a decision tree with no depth limit at all. It fit the training data almost perfectly, with an RMSE of 4.8801, and then fell apart on the test set with an RMSE of 138.5187. That is a textbook case of overfitting. It isn’t a fair comparison with the final scores, though, because that tree was trained on the early, half-cleaned data.
        </p>
        <p>
-        Next to it we’ve put the boosting model from the final run, which scored 4.6653 on its own training data and 4.8957 on the test set. The question to ask of any model is how much worse it gets on data it hasn’t seen, and these two are about as different as it gets.
+        Next to it we’ve put the boosting model from the final run, which scored 4.7378 on its own training data and 4.9329 on the test set. The question to ask of any model is how much worse it gets on data it hasn’t seen, and these two are about as different as it gets.
        </p>
        <div class="gap-grid" id="gap-grid">
        </div>
@@ -760,15 +760,34 @@ main_grad_predict = main_grad_model.predict(main_X_test)
 print(f'RMSE score of the gradboost Model on Cleaned Data + Distance: {root_mean_squared_error(main_y_test, main_grad_predict):.4f}')
 print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code></pre>
        </div>
-       <div class="warning">
-        <strong>
-         Two numbers we still need to reconcile:
-        </strong>
-        in an earlier run we reached an RMSE of 5.4765 with a tuned tree, but that run isn’t in the final notebook, whose tree cell outputs 5.8409. The lab uses the
-        <em>
-         notebook value
-        </em>
-        until we rerun and record the better tree properly. That earlier run also picked the depth on validation data, which is another step the final notebook doesn’t show yet.
+       <h3 class="subhead">
+        A fairer comparison with a validation set
+       </h3>
+       <p>
+        Up to this point there was no validation set, so the tree depths in the cells above were chosen by hand and only the test set could tell us how they did. That is a small way of peeking at the test set, so at the end of the notebook we split the same 500,000 trips 60/20/20 instead, picked the tree depth and the number of boosting rounds on the validation set, and only then scored each model on the test set once.
+       </p>
+       <div class="lab" id="val-lab">
+        <h3>
+         The final comparison, tuned on validation and tested once
+        </h3>
+        <div class="split-grid">
+         <div id="val-scores">
+         </div>
+         <div>
+          <p class="panel-title">
+           Picking the tree depth
+           <span>
+            validation RMSE in minutes
+           </span>
+          </p>
+          <div id="val-depths">
+          </div>
+         </div>
+        </div>
+        <p aria-live="polite" class="summary" id="val-summary" role="status">
+        </p>
+        <p class="source-line" id="val-source">
+        </p>
        </div>
       </section>
       <section class="chapter" id="findings">
@@ -791,7 +810,7 @@ print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code><
         <strong>
          There are real limits to this.
         </strong>
-        We used a random train/test split instead of the time-based split we had planned, our duration and speed limits throw away some trips that were probably genuine, and the hour features still need a rerun after the bug fix. So please treat this as an exploration of one month in one city, and not as a rule for every tabular problem.
+        We used a random train/test split instead of the time-based split we had planned, and our duration and speed limits throw away some trips that were probably genuine. So please treat this as an exploration of one month in one city, and not as a rule for every tabular problem.
        </p>
        <p>
         The starting point for all of this was
@@ -846,11 +865,11 @@ print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code><
     </span>
    </div>
   </footer>
-  <script defer="" src="../js/common.js?v=20261117-tidy2">
+  <script defer="" src="../js/common.js?v=20261117-eval1">
   </script>
-  <script defer="" src="../js/nyc-data.js?v=20261117-tidy2">
+  <script defer="" src="../js/nyc-data.js?v=20261117-eval1">
   </script>
-  <script defer="" src="../js/nyc.js?v=20261117-tidy2">
+  <script defer="" src="../js/nyc.js?v=20261117-eval1">
   </script>
  </body>
 </html>

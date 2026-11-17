@@ -4,8 +4,7 @@
     "source": "Kaggle elemento NYC Yellow Taxi Trip Data",
     "sample_for_models": 500000,
     "test_fraction": 0.25,
-    "split": "Random train/test split, random_state=42, as implemented in uploaded notebook. Time-based split not yet run.",
-    "unverified": "Notebook does not show separate validation tuning. An earlier tuned run (not in the final notebook) reported a different best depth.",
+    "split": "Random 75/25 train/test split for the feature stages and a 60/20/20 train/validation/test split for the final comparison, random_state=42. Time-based split not run.",
     "rmse_unit": "minutes",
     "note": "Metrics copied from saved notebook output, not recalculated in this website."
   },
@@ -84,27 +83,24 @@
     {
       "features": "hour",
       "model": "linear",
-      "rmse": 6.2453,
-      "mae": 4.1858,
-      "source": "Notebook cell 51",
-      "flag": "This score was recorded before we fixed the hour_23 bug, so it still needs a rerun."
+      "rmse": 6.2454,
+      "mae": 4.1859,
+      "source": "Notebook cell 51"
     },
     {
       "features": "hour",
       "model": "tree",
-      "rmse": 5.8409,
-      "mae": 3.7339,
+      "rmse": 5.8489,
+      "mae": 3.7341,
       "source": "Notebook cell 52",
-      "depth": 14,
-      "flag": "An earlier tuned run reached 5.4765 RMSE, but it isn't in the final notebook, so this uses the notebook's number."
+      "depth": 14
     },
     {
       "features": "hour",
       "model": "boost",
-      "rmse": 4.8957,
-      "mae": 3.1181,
-      "source": "Notebook cell 53",
-      "flag": "This score was recorded before we fixed the hour_23 bug, so it still needs a rerun."
+      "rmse": 4.9329,
+      "mae": 3.1527,
+      "source": "Notebook cell 53"
     }
   ],
   "early": {
@@ -225,11 +221,82 @@
       "source": "Notebook cell 19, counted partway through cleaning"
     },
     "overfit": {
-      "boostTrain": 4.6653,
-      "boostTest": 4.8957,
+      "boostTrain": 4.7378,
+      "boostTest": 4.9329,
       "treeTrain": 4.8801,
       "treeTest": 138.5187,
       "source": "Notebook cells 26, 53 and 55"
     }
+  },
+  "validation": {
+    "split": "60/20/20 train/validation/test split of the same 500,000-trip sample with all the final features, random_state=42",
+    "linear": {
+      "validation": {
+        "rmse": 6.254,
+        "mae": 4.1958
+      },
+      "test": {
+        "rmse": 6.2253,
+        "mae": 4.1783
+      }
+    },
+    "tree": {
+      "depth": 10,
+      "validation": {
+        "rmse": 5.8552,
+        "mae": 3.8232
+      },
+      "test": {
+        "rmse": 5.8109,
+        "mae": 3.8001
+      },
+      "search": [
+        [
+          6,
+          6.0265
+        ],
+        [
+          8,
+          5.9354
+        ],
+        [
+          10,
+          5.8552
+        ],
+        [
+          12,
+          5.8565
+        ],
+        [
+          14,
+          5.8824
+        ],
+        [
+          16,
+          5.9478
+        ],
+        [
+          18,
+          6.1629
+        ],
+        [
+          20,
+          6.3092
+        ]
+      ]
+    },
+    "boost": {
+      "rounds": 2000,
+      "maxRounds": 2000,
+      "validation": {
+        "rmse": 4.8758,
+        "mae": 3.0988
+      },
+      "test": {
+        "rmse": 4.8627,
+        "mae": 3.0903
+      }
+    },
+    "source": "Notebook cells 57 to 61"
   }
 }

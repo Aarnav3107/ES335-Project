@@ -36,7 +36,7 @@ Ideation and brainstorming, and the project summary on the website's home page, 
 ├── requirements.txt
 ├── .gitignore
 ├── notebooks/
-│   ├── nyc-taxi-final.ipynb               # NYC Taxi, final Kaggle run with outputs
+│   ├── es335-project-nyc-taxi.ipynb       # NYC Taxi, final Kaggle run with outputs
 │   ├── seoul-bike-sharing-final.ipynb     # Seoul Bikes, final Kaggle run with outputs
 │   └── es335-project-football-xg.ipynb    # Football xG, final Kaggle run with outputs
 ├── data/

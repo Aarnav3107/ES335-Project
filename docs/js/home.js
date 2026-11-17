@@ -26,14 +26,14 @@
         title: 'NYC Taxi: changing the data and features',
         detail: 'On the final cleaned sample, adding Haversine distance took Linear Regression from 8.9366 to 6.4735 minutes RMSE. Before the cleaning, the same feature did almost nothing (52.7959 without it and 52.7962 with it), so the data quality work is what let the feature help at all. The weekday and hour features added a smaller 3.5% on top.',
         link: 'datasets/nyc-taxi.html#features' },
-      model: { effect: '−21.6%', what: 'RMSE from Linear Regression to boosting, with the final features',
+      model: { effect: '−21.9%', what: 'Test RMSE from Linear Regression to boosting, with the final features',
         title: 'NYC Taxi: changing the model',
-        detail: 'With all the features in place, switching from Linear Regression (6.2453) to Histogram Gradient Boosting (4.8957) lowered the RMSE by 21.6%. So the model clearly mattered here too, even though it only got the chance to matter once the data was cleaned and represented well.',
+        detail: 'With all the features in place, and the tree depth and boosting rounds picked on a validation set, switching from Linear Regression (6.2253) to Histogram Gradient Boosting (4.8627) lowered the test RMSE by 21.9%. So the model clearly mattered here too, even though it only got the chance to matter once the data was cleaned and represented well.',
         link: 'datasets/nyc-taxi.html#models' },
-      evaluation: { effect: 'Not tested', what: 'Only a random split so far', untested: true,
+      evaluation: { effect: 'Same ranking', what: 'Tuning on a validation set kept boosting ahead of the tree and Linear Regression',
         title: 'NYC Taxi: changing the evaluation',
-        detail: 'Every NYC result comes from one random 75/25 split. The time-based split we planned hasn’t been run yet, so this lever is honestly untested for this dataset, and it is the first thing we would add next.',
-        link: 'datasets/nyc-taxi.html#problem' }
+        detail: 'We repeated the final comparison with a 60/20/20 split, picking the tree depth and the number of boosting rounds on the validation set and scoring the test set only once. The scores moved only slightly and the ranking stayed exactly the same (boosting 4.8627, tree 5.8109, Linear Regression 6.2253 minutes), so the NYC conclusions don’t depend on how we tuned. A time-based split is still untested.',
+        link: 'datasets/nyc-taxi.html#models' }
     },
     seoul: {
       features: { effect: 'Not tested', what: 'Kept minimal on purpose', untested: true,
@@ -126,13 +126,15 @@
     },
     evaluation: {
       intro: 'A split that fits the question, tuning kept separate from the final test, and metrics that suit the task.',
-      nyc: 'One random 75/25 train/test split on a 500,000-trip sample, scored with RMSE and MAE in minutes. There is no separate validation set yet, which is the main thing we plan to fix after V1.',
+      nyc: 'A random 75/25 train/test split on a 500,000-trip sample for the feature stages, scored with RMSE and MAE in minutes, and a 60/20/20 rerun of the final comparison where the tree depth and the boosting rounds are picked on validation and the test set is used once. A time-based split is still untested.',
+
       seoul: 'Three 60/20/20 designs, random rows, chronological and season-stratified whole days, each answering a different question. The validation set controls XGBoost’s early stopping, and the test set is only used for the final scores.',
       xg: 'Matches are split 60/20/20, stratified by league, so a match never sits in two sets. Validation picks the tree depth and controls early stopping. Log loss and AUC replace accuracy because only about 1 in 10 shots is a goal, the success rule was written down before the rematch, and the result was repeated on ten match splits.'
     },
     results: {
       intro: 'Results read in context, with the uncertainty and the limits stated rather than hidden.',
-      nyc: 'Haversine cut Linear Regression’s RMSE by 27.6%, and boosting reached 4.8957 minutes with the final features. The limits are one month of data, a random split and a pending rerun after the hour_23 fix.',
+      nyc: 'Haversine cut Linear Regression’s RMSE by 27.6%, and with the depth and rounds picked on validation, boosting reached 4.8627 minutes on the test set. The limits are one month of data and random splits instead of a time-based one, and boosting was still improving at its 2,000-round cap.',
+
       seoul: 'The best model changes with the split, and Linear Regression wins only on the chronological test set. The limits are one year of data and one seed per split, and the season shift is shown but its causal role isn’t isolated.',
       xg: 'The gap between Logistic Regression and XGBoost closed to level, and the engineered model landed close to StatsBomb’s xG (0.2453 against 0.2431). The limits are one season of four leagues and an XGBoost that wasn’t tuned.'
     },

@@ -321,4 +321,33 @@
       return card;
     }));
   })();
+
+  /* ---------- Chapter 04: the final comparison with a validation set ---------- */
+  (() => {
+    const v = data.validation;
+    if (!v || !q('#val-lab')) return;
+    const rows = [['Linear Regression', v.linear], [`Decision Tree (max_depth=${v.tree.depth})`, v.tree], ['Histogram Gradient Boosting', v.boost]];
+    const table = element('table', 'table');
+    const head = element('tr');
+    ['Model', 'Val RMSE', 'Val MAE', 'Test RMSE', 'Test MAE'].forEach(h => head.append(element('th', '', h)));
+    const thead = element('thead'); thead.append(head);
+    const body = element('tbody');
+    rows.forEach(([name, r]) => {
+      const tr = element('tr');
+      [name, r.validation.rmse.toFixed(4), r.validation.mae.toFixed(4), r.test.rmse.toFixed(4), r.test.mae.toFixed(4)].forEach(c => tr.append(element('td', '', c)));
+      body.append(tr);
+    });
+    table.append(thead, body);
+    const wrap = element('div', 'table-wrap'); wrap.append(table);
+    q('#val-scores').replaceChildren(wrap);
+    const max = Math.max(...v.tree.search.map(([, r]) => r)), min = Math.min(...v.tree.search.map(([, r]) => r));
+    q('#val-depths').replaceChildren(...v.tree.search.map(([depth, r]) => {
+      const row = element('div', `ladder-row${depth === v.tree.depth ? '' : ' muted-row'}`);
+      row.append(element('span', '', `max_depth=${depth}${depth === v.tree.depth ? ' (picked)' : ''}`), bar(((r - min * 0.98) / (max - min * 0.98)) * 100), element('span', 'value', r.toFixed(4)));
+      return row;
+    }));
+    const gain = (v.linear.test.rmse - v.boost.test.rmse) / v.linear.test.rmse * 100;
+    q('#val-summary').textContent = `The depth search picked a depth of ${v.tree.depth}, and the ranking didn’t change: boosting is still clearly the best model at ${v.boost.test.rmse.toFixed(4)} minutes on the test set, followed by the tree at ${v.tree.test.rmse.toFixed(4)} and Linear Regression at ${v.linear.test.rmse.toFixed(4)}, which makes boosting ${gain.toFixed(1)}% better than Linear Regression. One thing to keep in mind is that boosting’s best round was the very last of its ${fmt(v.boost.maxRounds)}, so its validation error was still falling and a few more rounds might help a little.`;
+    q('#val-source').textContent = `${v.source}. ${v.split.charAt(0).toUpperCase()}${v.split.slice(1)}.`;
+  })();
 })();
