@@ -6,6 +6,10 @@
 
 The website tells the full story of each case study with interactive evidence, and its home page ties the three together.
 
+## Acknowledgements
+
+We would like to thank Prof. Udit Bhatia, the instructor of ES335 at IIT Gandhinagar, for a course that gave us the tools to ask these questions in the first place, and for the freedom to follow them wherever they led. This project grew out of what we learned in his class, and we are grateful for his guidance and his understanding throughout the semester.
+
 ## The three case studies
 
 | Case study | Question | What it showed us |
@@ -42,8 +46,6 @@ Ideation and brainstorming, and the project summary on the website's home page, 
 │   ├── nyc-results.json                   # scores and evidence taken from the notebook outputs
 │   ├── seoul-results.json
 │   └── xg-results.json
-├── research/
-│   └── experiments.md                     # our running experiment log
 └── docs/                                  # the website, served by GitHub Pages
 ```
 
@@ -58,6 +60,15 @@ The Football xG notebook reads a shots table built from StatsBomb Open Data. On 
 ## The website
 
 The site lives in `docs/` and is published with GitHub Pages from the `main` branch. It needs no build step: every page is plain HTML, CSS and JavaScript, and it also works when opened straight from disk. The numbers on the site are taken from the saved notebook outputs. Scripts in `docs/tools/` generate two of the site's data files: the Football xG data is read directly from the saved notebook outputs, and the Seoul year timeline is rebuilt from the source CSV with the notebook's split code, refusing to write anything unless it reproduces the published season coverage exactly. To update the live site, edit the files in `docs/`, then commit and push to `main`, and GitHub Pages redeploys within a minute or two.
+
+To regenerate the two data files after a new notebook run, from inside `docs/`:
+
+```bash
+python tools/build_xg_data.py notebooks/football-xg.ipynb path/to/xg_lr_models.json
+python tools/build_seoul_days.py path/to/SeoulBikeData.csv .
+```
+
+The first reads the saved outputs of the Football xG notebook (and the model file its last cell exports), and the second needs pandas and scikit-learn.
 
 
 ## References

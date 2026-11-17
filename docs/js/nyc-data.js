@@ -6,7 +6,7 @@ window.NYC_DATA = {
     "sample_for_models": 500000,
     "test_fraction": 0.25,
     "split": "Random train/test split, random_state=42, as implemented in uploaded notebook. Time-based split not yet run.",
-    "unverified": "Notebook does not show separate validation tuning. Best-depth figures in experiment log differ from current notebook outputs.",
+    "unverified": "Notebook does not show separate validation tuning. An earlier tuned run (not in the final notebook) reported a different best depth.",
     "rmse_unit": "minutes",
     "note": "Metrics copied from saved notebook output, not recalculated in this website."
   },
@@ -97,7 +97,7 @@ window.NYC_DATA = {
       "mae": 3.7339,
       "source": "Notebook cell 52",
       "depth": 14,
-      "flag": "Our experiment log has a better tuned tree (5.4765 RMSE) that isn't in the notebook yet, so this uses the notebook's number."
+      "flag": "An earlier tuned run reached 5.4765 RMSE, but it isn't in the final notebook, so this uses the notebook's number."
     },
     {
       "features": "hour",

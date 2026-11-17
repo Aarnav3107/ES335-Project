@@ -7,8 +7,8 @@
   <title>
    NYC Taxi · How messy data hid a good feature | Beyond the Model
   </title>
-  <link href="../css/style.css?v=20261116-home1" rel="stylesheet"/>
-  <link href="../css/nyc.css?v=20261116-home1" rel="stylesheet"/>
+  <link href="../css/style.css?v=20261117-tidy2" rel="stylesheet"/>
+  <link href="../css/nyc.css?v=20261117-tidy2" rel="stylesheet"/>
  </head>
  <body class="nyc">
   <header class="site-header">
@@ -41,9 +41,6 @@
   </header>
   <main>
    <section class="wrap hero" style="padding-bottom: 40px">
-    <span class="eyebrow">
-     Case study 01 / NYC Yellow Taxi, January 2016 / Regression
-    </span>
     <h1>
      How messy data hid a perfectly good feature
     </h1>
@@ -767,11 +764,11 @@ print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code><
         <strong>
          Two numbers we still need to reconcile:
         </strong>
-        our experiment log mentions a tuned tree with an RMSE of 5.4765, but the final tree cell in the notebook outputs 5.8409. The lab uses the
+        in an earlier run we reached an RMSE of 5.4765 with a tuned tree, but that run isn’t in the final notebook, whose tree cell outputs 5.8409. The lab uses the
         <em>
          notebook value
         </em>
-        until we rerun and record the better tree properly. The log also describes picking the depth on validation data, but that step isn’t in the notebook.
+        until we rerun and record the better tree properly. That earlier run also picked the depth on validation data, which is another step the final notebook doesn’t show yet.
        </div>
       </section>
       <section class="chapter" id="findings">
@@ -807,9 +804,6 @@ print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code><
         <a class="btn" href="dataset-2.html">
          Continue to Seoul Bikes →
         </a>
-        <a class="btn ghost" href="../research/experiments.md">
-         Read our experiment log
-        </a>
        </div>
       </section>
       <section class="chapter" id="code">
@@ -820,14 +814,11 @@ print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code><
         Code and sources
        </h2>
        <p>
-        Every code block on this page is copied directly from the notebook rather than rewritten for the website. The full notebook and our hand-written experiment log are in the repository as well, if you want to follow the whole process.
+        Every code block on this page is copied directly from the notebook rather than rewritten for the website. The full notebook, with all of its saved outputs, is linked below if you want to follow the whole process.
        </p>
        <div class="hero-actions">
         <a class="btn ghost" href="../notebooks/nyc-taxi.ipynb">
          Full notebook ↗
-        </a>
-        <a class="btn ghost" href="../research/experiments.md">
-         Experiment log ↗
         </a>
         <a class="btn ghost" href="https://www.kaggle.com/datasets/elemento/nyc-yellow-taxi-trip-data">
          Data source ↗
@@ -847,25 +838,19 @@ print(f'MAE: {mean_absolute_error(main_y_test, main_grad_predict):.4f}')</code><
      Beyond the Model · ES335 · IIT Gandhinagar
     </span>
     <span>
-     <a href="../notebooks/nyc-taxi.ipynb">
-      Notebook
-     </a>
+     <a href="../notebooks/nyc-taxi.ipynb">NYC Taxi notebook</a>
      ·
-     <a href="../research/experiments.md">
-      Experiment log
-     </a>
+     <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html" rel="noopener noreferrer" target="_blank">Source paper ↗</a>
      ·
-     <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html">
-      Foundation paper ↗
-     </a>
+     <a href="https://github.com/Aarnav3107/ES335-Project" rel="noopener noreferrer" target="_blank">GitHub repository ↗</a>
     </span>
    </div>
   </footer>
-  <script defer="" src="../js/common.js?v=20261116-home1">
+  <script defer="" src="../js/common.js?v=20261117-tidy2">
   </script>
-  <script defer="" src="../js/nyc-data.js?v=20261116-home1">
+  <script defer="" src="../js/nyc-data.js?v=20261117-tidy2">
   </script>
-  <script defer="" src="../js/nyc.js?v=20261116-home1">
+  <script defer="" src="../js/nyc.js?v=20261117-tidy2">
   </script>
  </body>
 </html>

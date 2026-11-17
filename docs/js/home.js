@@ -138,7 +138,7 @@
     },
     reproducibility: {
       intro: 'Whether someone else could follow the data, the split, the preprocessing and the models.',
-      nyc: 'The final Kaggle notebook with its saved outputs, every code block on the page copied verbatim, our experiment log, and the Kaggle dataset link.',
+      nyc: 'The final Kaggle notebook with its saved outputs, every code block on the page copied verbatim, and the Kaggle dataset link.',
       seoul: 'The final notebook with its outputs, the downloadable scores, and a build script that recreates the year timeline from the CSV and refuses to run unless it reproduces the published season coverage.',
       xg: 'A dataset-build notebook and script for the shots table, page numbers generated directly from the notebook outputs, and the fitted models exported and checked against sklearn.'
     }

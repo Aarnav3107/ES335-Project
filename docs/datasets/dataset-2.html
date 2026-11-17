@@ -7,17 +7,17 @@
   <title>
    Seoul Bikes · How the split changed the winner | Beyond the Model
   </title>
-  <link href="../css/style.css?v=20261116-home1" rel="stylesheet"/>
-  <link href="../css/seoul.css?v=20261116-home1" rel="stylesheet"/>
-  <script defer="" src="../js/seoul-data.js?v=20261116-home1">
+  <link href="../css/style.css?v=20261117-tidy2" rel="stylesheet"/>
+  <link href="../css/seoul.css?v=20261117-tidy2" rel="stylesheet"/>
+  <script defer="" src="../js/seoul-data.js?v=20261117-tidy2">
   </script>
-  <script defer="" src="../js/seoul.js?v=20261116-home1">
+  <script defer="" src="../js/seoul.js?v=20261117-tidy2">
   </script>
-  <script defer="" src="../js/seoul-days.js?v=20261116-home1">
+  <script defer="" src="../js/seoul-days.js?v=20261117-tidy2">
   </script>
-  <script defer="" src="../js/seoul-year.js?v=20261116-home1">
+  <script defer="" src="../js/seoul-year.js?v=20261117-tidy2">
   </script>
-  <script defer="" src="../js/common.js?v=20261116-home1">
+  <script defer="" src="../js/common.js?v=20261117-tidy2">
   </script>
  </head>
  <body class="seoul">
@@ -54,9 +54,6 @@
   </header>
   <main id="main">
    <section class="wrap hero" style="padding-bottom: 40px">
-    <span class="eyebrow">
-     Case study 02 / Seoul Bike Sharing / Regression
-    </span>
     <h1>
      The same three models told a different story every time we changed the split
     </h1>
@@ -67,8 +64,8 @@
      <a class="btn" href="#problem">
       Start exploring ↓
      </a>
-     <a class="btn ghost" href="../notebooks/seoul-source.md">
-      Read the original source
+     <a class="btn ghost" href="../notebooks/seoul-bike-sharing.ipynb">
+      Read the original notebook
      </a>
     </div>
    </section>
@@ -865,9 +862,6 @@ X = pd.get_dummies(X, columns=['Hour', 'Seasons', 'Holiday', 'Functioning Day'],
         </p>
        </div>
        <div class="hero-actions">
-        <a class="btn" href="../notebooks/seoul-source.md">
-         Read the full shared code and our reflections ↗
-        </a>
         <a class="btn ghost" download="" href="../notebooks/seoul-bike-sharing.ipynb">
          Download the final notebook ↓
         </a>
@@ -890,10 +884,11 @@ X = pd.get_dummies(X, columns=['Hour', 'Seasons', 'Holiday', 'Functioning Day'],
      Beyond the Model · ES335 · IIT Gandhinagar
     </span>
     <span>
-     Dataset 2 · Seoul Bike Sharing ·
-     <a href="../README-SEOUL.md">
-      Editing and integration guide
-     </a>
+     <a href="../notebooks/seoul-bike-sharing.ipynb">Seoul Bikes notebook</a>
+     ·
+     <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/ae00e5ce7142d02e30a8235ede1ec6fc-Abstract-Datasets_and_Benchmarks_Track.html" rel="noopener noreferrer" target="_blank">Source paper ↗</a>
+     ·
+     <a href="https://github.com/Aarnav3107/ES335-Project" rel="noopener noreferrer" target="_blank">GitHub repository ↗</a>
     </span>
    </div>
   </footer>
